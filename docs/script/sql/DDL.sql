@@ -14,8 +14,8 @@ CREATE TABLE `crawl_proxy`
 CREATE TABLE `crawl_queue`
 (
     `id`                int(11)      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `host_type`         int(11)               DEFAULT '0' COMMENT '主机类型。0-普通类型；1-抓付费资源类型',
-    `host_ip`           varchar(50)           DEFAULT NULL COMMENT '任务处理的主机的IP。由哪台机器领取的M3U8下载任务就不能变更了',
+    `business_type`     int(11)               DEFAULT '0' COMMENT '业务类型。0-普通类型；1-抓付费资源类型',
+    `host_label`        varchar(50)           DEFAULT NULL COMMENT '主机标签。任务处理的主机的标签(config.yaml配置)。由哪台机器领取的M3U8下载任务就不能变更了',
     `country_code`      varchar(10)  NOT NULL COMMENT '国家二字码.(eg: CN,US,SG等)',
     `video_year`        int(11)      NOT NULL COMMENT '视频发布年份',
     `video_coll_id`     bigint(20)   NOT NULL DEFAULT '-1' COMMENT '视频集ID（视频集ID，不限于电视剧,-1代表单集视频，或者说电影）',
@@ -41,7 +41,7 @@ CREATE TABLE `crawl_queue`
 CREATE TABLE `crawl_vod_config`
 (
     `id`              int(11)      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `host_type`       int(11)               DEFAULT '2' COMMENT '传递给crawlQueue的hostType字段。2-nivod网；3-BananTV',
+    `business_type`   int(11)               DEFAULT '2' COMMENT '传递给CrawlQueue的businessType字段',
     `vod_type`        int(11)               DEFAULT '0' COMMENT '点播类型.0-电影；1-剧集（标志给展示逻辑，爬虫统一按剧集逻辑走）',
     `domain_key_part` varchar(50)  NOT NULL COMMENT '域名关键部分.用于配置策略',
     `program_no`      varchar(20)  NOT NULL DEFAULT '0' COMMENT '栏目编号',
@@ -60,9 +60,7 @@ CREATE TABLE `crawl_vod_config`
     `update_user`     varchar(20)           DEFAULT NULL COMMENT '修改者',
     `update_time`     datetime              DEFAULT NULL COMMENT '修改时间',
     PRIMARY KEY (`id`)
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 4
-  DEFAULT CHARSET = utf8mb4 COMMENT ='爬取点播整站爬取配置';
+) ENGINE = InnoDB COMMENT ='爬取点播整站爬取配置';
 
 CREATE TABLE `crawl_vod_config_task`
 (
@@ -74,11 +72,9 @@ CREATE TABLE `crawl_vod_config_task`
     `update_user`   varchar(20)      DEFAULT NULL COMMENT '修改者',
     `update_time`   datetime         DEFAULT NULL COMMENT '修改时间',
     PRIMARY KEY (`id`)
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 8
-  DEFAULT CHARSET = utf8mb4 COMMENT ='整站爬取配置生成的任务实例表';
+) ENGINE = InnoDB COMMENT ='整站爬取配置生成的任务实例表';
 
-CREATE TABLE `crawl_vod_tv`
+CREATE TABLE `crawl_vod`
 (
     `id`             int(11)      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     `vod_config_id`  int(11)      NOT NULL COMMENT '配置表主键ID',
@@ -107,14 +103,14 @@ CREATE TABLE `crawl_vod_tv`
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB COMMENT ='爬取点播视频清单列表';
 
-CREATE TABLE `crawl_vod_tv_item`
+CREATE TABLE `crawl_vod_item`
 (
     `id`           int(11) NOT NULL AUTO_INCREMENT,
-    `tv_id`        int(4)  NOT NULL COMMENT 'tv表ID',
+    `tv_id`        int(4)  NOT NULL COMMENT 'VOD表ID',
     `tv_item_md5`  varchar(50)  DEFAULT NULL COMMENT '集数MD5',
     `crawl_status` int(11)      DEFAULT NULL COMMENT '抓取状态.0-INIT;1-自动补全视频信息中;2-补充视频信息失败;3-补充视频信息成功;4-补充TV ID信息中;5-补充TV ID信息失败;6-补充TV ID信息成功',
     `seed_url`     varchar(500) DEFAULT NULL COMMENT '种子URL',
-    `seed_params`  varchar(500) DEFAULT NULL COMMENT '种子URL参数',
+    `seed_params`  varchar(200) DEFAULT NULL COMMENT '种子URL参数',
     `error_msg`    varchar(50)  DEFAULT NULL COMMENT '错误信息',
     `episodes`     varchar(50)  DEFAULT NULL COMMENT '集数',
     `create_user`  varchar(20)  DEFAULT NULL COMMENT '创建者',
@@ -122,5 +118,5 @@ CREATE TABLE `crawl_vod_tv_item`
     `update_user`  varchar(20)  DEFAULT NULL COMMENT '修改者',
     `update_time`  datetime     DEFAULT NULL COMMENT '修改时间',
     PRIMARY KEY (`id`)
-) ENGINE = InnoDB
+) ENGINE = InnoDB COMMENT ='爬取点播视频清单列表';
 

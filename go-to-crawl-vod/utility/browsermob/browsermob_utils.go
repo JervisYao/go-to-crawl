@@ -10,9 +10,9 @@ import (
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/tebeka/selenium"
+	"go-to-crawl-vod/internal/consts"
 	"go-to-crawl-vod/internal/service/infra/browsermobproxy"
-	"go-to-crawl-vod/internal/utils/constant"
-	"go-to-crawl-vod/internal/utils/file"
+	"go-to-crawl-vod/utility/file"
 	"io"
 	"time"
 )
@@ -20,7 +20,7 @@ import (
 const ResponseBody = "responseBody" // 外部根据情况使用响应体
 
 func GetHarRequestLocalRetry(proxy *browsermobproxy.Client, patternUrl string, patternContent string) *gjson.Json {
-	return GetHarRequest(proxy, patternUrl, patternContent, constant.LocalRetry)
+	return GetHarRequest(proxy, patternUrl, patternContent, consts.LocalRetry)
 }
 
 func GetHarRequest(proxy *browsermobproxy.Client, patternUrl string, patternContent string, retry int) *gjson.Json {

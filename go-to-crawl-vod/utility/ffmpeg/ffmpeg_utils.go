@@ -11,7 +11,7 @@ import (
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/grand"
 	"go-to-crawl-vod/internal/service/infra/config"
-	"go-to-crawl-vod/internal/utils/file"
+	"go-to-crawl-vod/utility/file"
 	"io/fs"
 	"io/ioutil"
 	"net/http"

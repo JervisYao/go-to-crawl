@@ -1,4 +1,4 @@
-package gf
+package time
 
 import (
 	"fmt"
