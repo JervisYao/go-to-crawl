@@ -32,5 +32,5 @@ func TestGproc(t *testing.T) {
 }
 
 func TestTransformTask(t *testing.T) {
-	TransformTask()
+	TransformTask(nil)
 }

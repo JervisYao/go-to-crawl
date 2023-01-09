@@ -5,5 +5,5 @@ import (
 )
 
 func TestCrawlCheckTask(t *testing.T) {
-	CrawlCheckTask.CheckQQLoginTask()
+	CrawlCheckTask.CheckQQLoginTask(nil)
 }

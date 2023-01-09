@@ -30,10 +30,10 @@ const (
 )
 
 const (
-	HostTypeNormal     = 0
-	HostTypeCrawlLogin = 1 // 抓需要登录的资源
-	HostTypeNiVod      = 2 // NiVod抓取模式
-	HostTypeBananTV    = 3 // BananTV抓取模式
+	BusinessTypeNormal     = 0
+	BusinessTypeCrawlLogin = 1 // 抓需要登录的资源
+	BusinessTypeNiVod      = 2 // NiVod抓取模式
+	BusinessTypeBananTV    = 3 // BananTV抓取模式
 )
 
 const (

@@ -4,19 +4,22 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/glog"
 	"github.com/tebeka/selenium"
+	"go-to-crawl-vod/internal/model/entity"
+	"go-to-crawl-vod/internal/service/do"
+	"go-to-crawl-vod/internal/service/infra/browsermobproxy"
 	"go-to-crawl-vod/utility/ffmpeg"
 	"go-to-crawl-vod/utility/http"
 )
 
 type BrowserContext struct {
 	Log             *glog.Logger
-	CrawlQueueSeed  *model.CmsCrawlQueue
+	CrawlQueueSeed  *entity.CrawlQueue
 	VodConfigTaskDO *do.CrawlVodConfigTaskDO
-	VodTV           *model.CmsCrawlVodTv
-	VodTVItem       *model.CmsCrawlVodTvItem
+	VodTV           *entity.CrawlVod
+	VodTVItem       *entity.CrawlVodItem
 	Service         *selenium.Service
-	XServer         *proxyServer.Server
-	XClient         *proxyServer.Client
+	XServer         *browsermobproxy.Server
+	XClient         *browsermobproxy.Client
 	Wd              selenium.WebDriver
 }
 
@@ -25,7 +28,7 @@ type CrawlVodFlowInterface interface {
 	CrawlByBrowserInterface
 
 	// 下载视频接口集合
-	ConvertM3U8(seed *model.CmsCrawlQueue, filePath string) (*ffmpeg.M3u8DO, error)
+	ConvertM3U8(seed *entity.CrawlQueue, filePath string) (*ffmpeg.M3u8DO, error)
 	ConvertM3U8GetBaseUrl(m3u8Url string) string
 	DownLoadToMp4(m3u8DO *ffmpeg.M3u8DO) error
 }
@@ -56,7 +59,7 @@ func (r *AbstractCrawlVodFlow) OpenBrowserWithParams(ctx *BrowserContext, json *
 func (r *AbstractCrawlVodFlow) FillTargetRequest(ctx *BrowserContext) {
 }
 
-func (r *AbstractCrawlVodFlow) ConvertM3U8(seed *model.CmsCrawlQueue, filePath string) (*ffmpeg.M3u8DO, error) {
+func (r *AbstractCrawlVodFlow) ConvertM3U8(seed *entity.CrawlQueue, filePath string) (*ffmpeg.M3u8DO, error) {
 	baseUrl := r.ConvertM3U8GetBaseUrl(seed.CrawlM3U8Url)
 	return ffmpeg.ConvertM3U8(seed.CrawlM3U8Url, baseUrl, filePath)
 }

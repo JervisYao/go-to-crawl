@@ -26,12 +26,12 @@ func TransformTask(ctx gctx.Ctx) {
 	})
 	//g.Dump(tans)
 	if err != nil {
-		log.Infof("countErr:%v", err)
+		log.Infof(gctx.GetInitCtx(), "countErr:%v", err)
 		return
 	}
 	if tans >= g.NewVar(config.GetCrawlCfg("maxTrans")).Int() {
 		//	同时转码数量超过配置文件数量则不继续
-		log.Infof("Trans Count Over Config.maxTrans")
+		log.Infof(gctx.GetInitCtx(), "Trans Count Over Config.maxTrans")
 		return
 	}
 
@@ -86,7 +86,7 @@ func TransformTask(ctx gctx.Ctx) {
 	info, _ := g.NewVar(queue).MarshalJSON()
 	//	通知CMS这部剧已经切片完成
 	log.Infof(gctx.GetInitCtx(), "DoCallBack:%v->Param:%v", config.GetCrawlCfg("callback_url"), string(info))
-	postRes := g.Client().PostContent(config.GetCrawlCfg("callback_url"), g.Map{"info": info})
+	postRes := g.Client().PostContent(gctx.GetInitCtx(), config.GetCrawlCfg("callback_url"), g.Map{"info": info})
 	//状态默认为转码完成
 	queue.UploadStatus = upload.Transformed
 	if !g.NewVar(postRes).IsEmpty() {

@@ -1,13 +1,14 @@
 package bilibili
 
 import (
-	"easygoadmin/appnewcms/task/dto"
-	"easygoadmin/appnewcms/utils/file"
 	"fmt"
 	"github.com/gocolly/colly"
-	"github.com/gogf/gf/encoding/gjson"
-	"github.com/gogf/gf/text/gregex"
-	"github.com/gogf/gf/util/gconv"
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/text/gregex"
+	"github.com/gogf/gf/v2/util/gconv"
+	"go-to-crawl-vod/internal/logic/task/dto"
+	"go-to-crawl-vod/utility/file"
 	"strconv"
 )
 
@@ -28,13 +29,13 @@ func (crawl *BilibiliCrawl) FillTargetRequest(ctx *dto.BrowserContext) {
 		var wd Data
 		dataJsons, err := gregex.MatchString(`__INITIAL_STATE__=(.*);\(function\(\)`, bodyStr)
 		if err != nil {
-			ctx.Log.Error(err)
+			ctx.Log.Error(gctx.GetInitCtx(), err)
 			return
 		}
 
 		err = gconv.Struct(dataJsons[1], &wd)
 		if err != nil {
-			ctx.Log.Error(err)
+			ctx.Log.Error(gctx.GetInitCtx(), err)
 			return
 		}
 
@@ -73,7 +74,7 @@ func (crawl *BilibiliCrawl) FillTargetRequest(ctx *dto.BrowserContext) {
 		innerColl.OnResponse(func(response *colly.Response) {
 			jsonObj := gjson.New(response.Body)
 			flvUrl := jsonObj.GetString("data.durl.0.url")
-			ctx.Log.Infof("flv url = %s", flvUrl)
+			ctx.Log.Infof(gctx.GetInitCtx(), "flv url = %s", flvUrl)
 
 			downloadBuilder := file.CreateBuilder().Url(flvUrl).SaveFile("D:\\刘星\\bilibili.flv")
 			downloadBuilder.Header("Referer", ctx.CrawlQueueSeed.CrawlSeedUrl)
@@ -86,7 +87,7 @@ func (crawl *BilibiliCrawl) FillTargetRequest(ctx *dto.BrowserContext) {
 
 	err := coll.Visit(ctx.CrawlQueueSeed.CrawlSeedUrl)
 	if err != nil {
-		ctx.Log.Error(err)
+		ctx.Log.Error(gctx.GetInitCtx(), err)
 		return
 	}
 

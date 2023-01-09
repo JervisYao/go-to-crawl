@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/gconv"
 	"go-to-crawl-vod/internal/dao"
+	"go-to-crawl-vod/internal/model/entity"
 )
 
 const (
@@ -22,12 +23,12 @@ var (
 )
 
 func GetRandomProxyUrl() string {
-	record, _ := dao.CrawlDict.Ctx(gctx.GetInitCtx()).Where(cdc.Namespace, NsProxy).And(cdc.DictStatus, DictEnable).OrderRandom().One()
+	record, _ := dao.CrawlDict.Ctx(gctx.GetInitCtx()).Where(cdc.Namespace, NsProxy).Where(cdc.DictStatus, DictEnable).OrderRandom().One()
 	if record == nil {
 		return ""
 	}
 
-	dict := new(model.CmsCrawlDict)
+	dict := new(entity.CrawlDict)
 	_ = gconv.Struct(record, dict)
 
 	return fmt.Sprintf("http://%s", dict.DictValue)

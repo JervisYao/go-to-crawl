@@ -1,15 +1,14 @@
 package nunuyy
 
 import (
-	"easygoadmin/appnewcms/model"
-	"easygoadmin/appnewcms/task/dto"
-	"easygoadmin/appnewcms/utils/browsermob"
-	"easygoadmin/appnewcms/utils/ffmpeg"
-	"easygoadmin/appnewcms/utils/http"
-	"easygoadmin/appnewcms/utils/selector"
-	"github.com/gogf/gf/encoding/gjson"
-	"github.com/gogf/gf/os/gtime"
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/tebeka/selenium"
+	"go-to-crawl-vod/internal/logic/task/dto"
+	"go-to-crawl-vod/utility/browsermob"
+	"go-to-crawl-vod/utility/ffmpeg"
+	"go-to-crawl-vod/utility/http"
+	"go-to-crawl-vod/utility/selector"
 	"time"
 )
 

@@ -2,8 +2,10 @@ package crawl
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-to-crawl-vod/internal/dao"
+	"go-to-crawl-vod/internal/model/entity"
 	"go-to-crawl-vod/internal/service/infra/config"
 	"time"
 )
@@ -12,18 +14,20 @@ var (
 	c = dao.CrawlQueue.Columns()
 )
 
-// hostName: 配置文件里能标识出当前节点唯一就行，eg：prod-1, dev-1, cluster-1等
-func GetSeed(status int, hostname string, hostType int) *model.CmsCrawlQueue {
-	where := dao.CrawlQueue.Where(c.CrawlStatus, status).And(c.HostType, hostType)
-	if hostname != "" {
-		where = where.And(c.HostIp, hostname)
+// hostLabel: 配置文件里能标识出当前节点唯一就行，eg：prod-1, dev-1, cluster-1等
+func GetSeed(status int, hostLabel string, businessType int) *entity.CrawlQueue {
+	where := dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Where(c.CrawlStatus, status).Where(c.BusinessType, businessType)
+	if hostLabel != "" {
+		where = where.Where(c.HostLabel, hostLabel)
 	}
-	seed, _ := where.FindOne()
+
+	var seed *entity.CrawlQueue
+	_ = where.Scan(&seed)
 	return seed
 }
 
-func GetNeedNotifySeedList() []*model.CmsCrawlQueue {
-	where := dao.CrawlQueue.Where(c.CrawlM3U8Notify, CrawlM3U8NotifyNo).And("crawl_m3u8_cnt >= ?", constant.ServerMaxRetry)
+func GetNeedNotifySeedList() []*entity.CrawlQueue {
+	where := dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Where(c.CrawlM3U8Notify, CrawlM3U8NotifyNo).And("crawl_m3u8_cnt >= ?", constant.ServerMaxRetry)
 	all, _ := where.FindAll()
 	return all
 }
@@ -31,11 +35,11 @@ func GetNeedNotifySeedList() []*model.CmsCrawlQueue {
 func ExistCrawling(hostType int) bool {
 	//爬虫状态为爬取中的数量大于0时 不继续
 	//需要新增条件限制host_type不同类型限制 避免互相冲突
-	count, _ := dao.CrawlQueue.Where(c.HostType, hostType).Count(c.CrawlStatus, Crawling)
+	count, _ := dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Where(c.HostType, hostType).Count(c.CrawlStatus, Crawling)
 	return count > 0
 }
 
-func UpdateStatus(seed *model.CmsCrawlQueue, status int) {
+func UpdateStatus(seed *entity.CrawlQueue, status int) {
 	if config.GetCrawlDebugBool("disableDB") {
 		return
 	}
@@ -44,7 +48,7 @@ func UpdateStatus(seed *model.CmsCrawlQueue, status int) {
 	dao.CrawlQueue.Data(seed).Where(c.Id, seed.Id).Update()
 }
 
-func UpdateUrlAndStatus(seed *model.CmsCrawlQueue) {
+func UpdateUrlAndStatus(seed *entity.CrawlQueue) {
 	if config.GetCrawlBool("disableDB") {
 		return
 	}
@@ -79,7 +83,7 @@ func ResetCrawlingTooLong() {
 // 重置挂起中的状态
 func ResetHangingStatus(fromStatus, toStatus, hangingMinutes int) {
 	waterMark := gtime.Now().Add(time.Duration(hangingMinutes) * -time.Minute)
-	seed, _ := dao.CrawlQueue.Where("update_time < ", waterMark).FindOne(c.CrawlStatus, fromStatus)
+	seed, _ := dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Where("update_time < ", waterMark).FindOne(c.CrawlStatus, fromStatus)
 	if seed == nil {
 		return
 	}
@@ -89,7 +93,7 @@ func ResetHangingStatus(fromStatus, toStatus, hangingMinutes int) {
 
 func ResetHostType2() {
 	//waterMark := gtime.Now().Add(time.Duration(hangingMinutes) * -time.Minute)
-	dao.CrawlQueue.Where(g.Map{
+	dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Where(g.Map{
 		"host_type = ?":                       2,
 		"(crawl_status =2 or crawl_status=5)": "",
 	}).Update(g.Map{

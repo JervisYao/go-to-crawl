@@ -5,21 +5,17 @@ import (
 	"go-to-crawl-vod/internal/logic/task/crawl/bilibili"
 	"go-to-crawl-vod/internal/logic/task/crawl/nunuyy"
 	"go-to-crawl-vod/internal/logic/task/dto"
+	"go-to-crawl-vod/internal/model/entity"
+	"go-to-crawl-vod/internal/service/crawl"
 )
 
 const (
-	Nunuyy     = "nunuyy"
-	Bilibbili  = "bilibili"
-	Ole        = "ole"
-	TangRenJie = "tangrenjie.tv"
-	QQ         = "v.qq.com"
-	NiVod      = "nivod.tv"
-	MudVod     = "mudvod.tv"
-	Banan      = "banan.tv"
-	Iqiyi      = "iqiyi.com"
+	Nunuyy    = "nunuyy"
+	Bilibbili = "bilibili"
+	QQ        = "v.qq.com"
 )
 
-func getCrawlVodFlowStrategy(seed *model.CmsCrawlQueue) dto.CrawlVodFlowInterface {
+func getCrawlVodFlowStrategy(seed *entity.CrawlQueue) dto.CrawlVodFlowInterface {
 
 	url := seed.CrawlSeedUrl
 
@@ -27,52 +23,23 @@ func getCrawlVodFlowStrategy(seed *model.CmsCrawlQueue) dto.CrawlVodFlowInterfac
 		return new(nunuyy.NunuyyCrawl)
 	} else if gstr.Contains(url, Bilibbili) {
 		return new(bilibili.BilibiliCrawl)
-	} else if gstr.Contains(url, Ole) {
-		return new(olevod.OleVodCrawl)
-	} else if gstr.Contains(url, TangRenJie) {
-		return new(tangrenjie.TangRenJieCrawl)
-	} else if gstr.Contains(url, QQ) {
-		return new(qq.QQCrawl)
-	} else if gstr.Contains(url, NiVod) || gstr.Contains(url, MudVod) {
-		return new(nivod.NiVodCrawl)
-	} else if gstr.Contains(url, Banan) {
-		return new(banan.BananCrawl)
-	} else if gstr.Contains(url, Iqiyi) {
-		return new(iqiyi.IqiyiCrawl)
 	}
 
 	return nil
 }
 
-func getCrawlVodTVStrategy(seed *model.CmsCrawlVodConfig) dto.CrawlVodTVInterface {
-
-	url := seed.SeedUrl
-
-	if gstr.Contains(url, NiVod) || gstr.ContainsI(url, MudVod) {
-		return new(nivod.NiVodTVTask)
-	} else if gstr.Contains(url, Banan) {
-		return new(banan.BananTvCrawl)
-	}
-
+func getCrawlVodTVStrategy(seed *entity.CrawlVodConfig) dto.CrawlVodTVInterface {
 	return nil
 }
 
-func getCrawlVodPadInfoStrategy(seed *model.CmsCrawlVodTv) dto.CrawlVodTVInterface {
-
-	url := seed.SeedUrl
-	if gstr.Contains(url, NiVod) || gstr.ContainsI(url, MudVod) {
-		return new(nivod.NiVodTVTask)
-	} else if gstr.Contains(url, Banan) {
-		return new(banan.BananTvCrawl)
-	}
-
+func getCrawlVodPadInfoStrategy(seed *entity.CrawlVod) dto.CrawlVodTVInterface {
 	return nil
 }
 
 func GetHostType(crawlSeedUrl string) int {
 	if gstr.Contains(crawlSeedUrl, QQ) {
-		return crawl.HostTypeCrawlLogin
+		return crawl.BusinessTypeCrawlLogin
 	} else {
-		return crawl.HostTypeNormal
+		return crawl.BusinessTypeNormal
 	}
 }

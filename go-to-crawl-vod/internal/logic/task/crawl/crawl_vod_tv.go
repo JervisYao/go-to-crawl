@@ -10,7 +10,9 @@ import (
 	"github.com/tebeka/selenium"
 	"go-to-crawl-vod/internal/dao"
 	"go-to-crawl-vod/internal/logic/task/dto"
+	"go-to-crawl-vod/internal/model/entity"
 	"go-to-crawl-vod/internal/service/crawl"
+	"go-to-crawl-vod/internal/service/do"
 	"go-to-crawl-vod/internal/service/infra/config"
 	"go-to-crawl-vod/internal/service/infra/lock"
 	"go-to-crawl-vod/utility/browsermob"
@@ -29,12 +31,12 @@ func (crawlUrl *crawlVodTVTask) GenVodConfigTask(ctx gctx.Ctx) {
 	}
 	crawl.UpdateVodConfig(vodConfig)
 
-	configTask := new(model.CmsCrawlVodConfigTask)
+	configTask := new(entity.CrawlVodConfigTask)
 	configTask.VodConfigId = vodConfig.Id
 	configTask.TaskStatus = crawl.ConfigTaskStatusInit
 	configTask.CreateTime = gtime.Now()
 
-	dao.CrawlVodConfigTask.Insert(configTask)
+	dao.CrawlVodConfigTask.Ctx(gctx.GetInitCtx()).Insert(configTask)
 
 }
 
@@ -67,7 +69,7 @@ func (crawlUrl *crawlVodTVTask) VodTVPadInfoTask(ctx gctx.Ctx) {
 		return
 	}
 
-	log.Infof("更新vod tv. id = %v, to status = %v", vodTv.Id, crawl.CrawlTVPadInfo)
+	log.Infof(gctx.GetInitCtx(), "更新vod tv. id = %v, to status = %v", vodTv.Id, crawl.CrawlTVPadInfo)
 	crawl.UpdateVodTVStatus(vodTv, crawl.CrawlTVPadInfo)
 
 	DoStartCrawlVodPadInfo(vodTv)
@@ -140,16 +142,17 @@ func (crawlUrl *crawlVodTVTask) VodTVItemPadIdTask(ctx gctx.Ctx) {
 }
 
 // 转换到爬取队列走标准化抓取
-func transToCrawlQueue(vodTv *model.CmsCrawlVodTv, vodTvItem *model.CmsCrawlVodTvItem) {
+func transToCrawlQueue(vodTv *entity.CrawlVod, vodTvItem *entity.CrawlVodItem) {
 
 	vodConfig := crawl.GetVodConfigById(vodTv.VodConfigId)
-	hostType := crawl.HostTypeNiVod
-	if vodConfig != nil && vodConfig.HostType != 0 {
-		hostType = vodConfig.HostType
+	businessType := crawl.BusinessTypeNiVod
+	if vodConfig != nil && vodConfig.BusinessType != 0 {
+		businessType = vodConfig.BusinessType
 	}
-	crawlQueue := new(model.CmsCrawlQueue)
-	crawlQueue.HostIp = g.Cfg().GetString("crawl.down_ip")
-	crawlQueue.HostType = hostType
+	crawlQueue := new(entity.CrawlQueue)
+	hostLabelVar, _ := g.Cfg().Get(gctx.GetInitCtx(), "crawl.hostLabel")
+	crawlQueue.HostLabel = hostLabelVar.String()
+	crawlQueue.BusinessType = businessType
 
 	crawlQueue.VideoYear = gconv.Int(vodTv.VideoYear)
 	crawlQueue.VideoCollId = vodTv.VideoCollId
@@ -161,7 +164,7 @@ func transToCrawlQueue(vodTv *model.CmsCrawlVodTv, vodTvItem *model.CmsCrawlVodT
 	crawlQueue.CrawlSeedParams = ""
 	crawlQueue.CreateTime = gtime.Now()
 
-	_, _ = dao.CrawlQueue.Save(crawlQueue)
+	_, _ = dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Save(crawlQueue)
 }
 func getCountryCodeByString(country string) string {
 	//大陆 香港 台湾 日本 韩国 欧美 泰国 新马 其它

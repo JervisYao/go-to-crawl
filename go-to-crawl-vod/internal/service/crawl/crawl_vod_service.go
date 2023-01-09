@@ -7,6 +7,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"go-to-crawl-vod/internal/dao"
+	"go-to-crawl-vod/internal/model/entity"
+	"go-to-crawl-vod/internal/service/do"
 	"time"
 )
 
@@ -24,27 +26,26 @@ const (
 	ConfigTaskStatusOk         = 3
 )
 
-func GetVodConfigById(id int) *model.CmsCrawlVodConfig {
-	config, _ := dao.CrawlVodConfig.FindOne(vc.Id, id)
+func GetVodConfigById(id int) *entity.CrawlVodConfig {
+	config, _ := dao.CrawlVodConfig.Ctx(gctx.GetInitCtx()).FindOne(vc.Id, id)
 	return config
 }
 
-func GetVodConfig() *model.CmsCrawlVodConfig {
+func GetVodConfig() *entity.CrawlVodConfig {
 	hourBefore := time.Now().Add(-gtime.H).Format(timeUtil.YYYY_MM_DD_HH_MM_SS)
-	where := dao.CrawlVodConfig.Where(fmt.Sprintf("%v < '%v' or %v is null", vc.UpdateTime, hourBefore, vc.UpdateTime))
 	where := dao.CrawlVodConfig.Ctx(gctx.GetInitCtx()).Where(fmt.Sprintf("%v < '%v' or %v is null", vc.UpdateTime, hourBefore, vc.UpdateTime))
-	where = where.And(vc.SeedStatus, 1)
+	where = where.Where(vc.SeedStatus, 1)
 	where.Order(vc.UpdateTime)
 	config, _ := where.FindOne()
 	return config
 }
 
-func UpdateVodConfig(vodConfig *model.CmsCrawlVodConfig) {
+func UpdateVodConfig(vodConfig *entity.CrawlVodConfig) {
 	vodConfig.UpdateTime = gtime.Now()
-	dao.CrawlVodConfig.Data(vodConfig).Where(vc.Id, vodConfig.Id).Update()
+	dao.CrawlVodConfig.Ctx(gctx.GetInitCtx()).Data(vodConfig).Where(vc.Id, vodConfig.Id).Update()
 }
 
-func UpdateVodConfigTaskStatus(configTask *model.CmsCrawlVodConfigTask, status int) {
+func UpdateVodConfigTaskStatus(configTask *entity.CrawlVodConfigTask, status int) {
 	configTask.TaskStatus = status
 	configTask.UpdateTime = gtime.Now()
 	dao.CrawlVodConfigTask.Data(configTask).Where(vct.Id, configTask.Id).Update()
@@ -58,57 +59,57 @@ func GetVodConfigTaskDO() *do.CrawlVodConfigTaskDO {
 	config, _ := dao.CrawlVodConfig.One(vc.Id, configTask.VodConfigId)
 
 	taskDO := new(do.CrawlVodConfigTaskDO)
-	taskDO.CmsCrawlVodConfigTask = configTask
-	taskDO.CmsCrawlVodConfig = config
+	taskDO.CrawlVodConfigTask = configTask
+	taskDO.CrawlVodConfig = config
 
 	return taskDO
 }
 
-func GetVodTvById(id int) *model.CmsCrawlVodTv {
-	one, _ := dao.CrawlVodTv.Where(vt.Id, id).FindOne()
+func GetVodTvById(id int) *entity.CrawlVod {
+	one, _ := dao.CrawlVod.Ctx(gctx.GetInitCtx()).Where(vt.Id, id).FindOne()
 	return one
 }
 
-func GetVodTvByStatus(crawlStatus int) *model.CmsCrawlVodTv {
-	one, _ := dao.CrawlVodTv.Where(vt.CrawlStatus, crawlStatus).FindOne()
+func GetVodTvByStatus(crawlStatus int) *entity.CrawlVod {
+	one, _ := dao.CrawlVod.Ctx(gctx.GetInitCtx()).Where(vt.CrawlStatus, crawlStatus).FindOne()
 	return one
 }
 
-func GetVodTvByMd5(vodMd5 string) *model.CmsCrawlVodTv {
-	one, _ := dao.CrawlVodTv.Where(vt.VodMd5, vodMd5).FindOne()
+func GetVodTvByMd5(vodMd5 string) *entity.CrawlVod {
+	one, _ := dao.CrawlVod.Ctx(gctx.GetInitCtx()).Where(vt.VodMd5, vodMd5).FindOne()
 	return one
 }
 
-func UpdateVodTVStatus(vodTv *model.CmsCrawlVodTv, status int) {
+func UpdateVodTVStatus(vodTv *entity.CrawlVod, status int) {
 	vodTv.CrawlStatus = status
 	vodTv.UpdateTime = gtime.Now()
-	dao.CrawlVodTv.Data(vodTv).Where(vt.Id, vodTv.Id).Update()
+	dao.CrawlVod.Ctx(gctx.GetInitCtx()).Data(vodTv).Where(vt.Id, vodTv.Id).Update()
 }
 
-func GetPreparedVodTvItem() *model.CmsCrawlVodTvItem {
-	join := g.Model(dao.CrawlVodTvItem.Table+" vti").LeftJoin(dao.CrawlVodTv.Table+" vt", fmt.Sprintf("vti.%s = vt.%s", vti.TvId, vt.Id))
+func GetPreparedVodTvItem() *entity.CrawlVodItem {
+	join := g.Model(dao.CrawlVodItem.Table()+" vti").LeftJoin(dao.CrawlVod.Table()+" vt", fmt.Sprintf("vti.%s = vt.%s", vti.TvId, vt.Id))
 	record, _ := join.Fields("vti.*").One(fmt.Sprintf("vti.%s = %d and vt.%s = %d", vti.CrawlStatus, CrawlTVItemInit, vt.CrawlStatus, CrawlTVPadIdOk))
 	if record == nil {
 		return nil
 	}
 
-	tvItem := new(model.CmsCrawlVodTvItem)
+	tvItem := new(entity.CrawlVodItem)
 	_ = gconv.Struct(record, tvItem)
 	return tvItem
 }
 
-func GetVodTvItemByMd5(vodItemMd5 string) *model.CmsCrawlVodTvItem {
-	one, _ := dao.CrawlVodTvItem.Where(vti.TvItemMd5, vodItemMd5).FindOne()
+func GetVodTvItemByMd5(vodItemMd5 string) *entity.CrawlVodItem {
+	one, _ := dao.CrawlVodItem.Ctx(gctx.GetInitCtx()).Where(vti.TvItemMd5, vodItemMd5).FindOne()
 	return one
 }
 
-func GetVodTvItemByVideoItemId(videoItemId string) *model.CmsCrawlVodTvItem {
-	one, _ := dao.CrawlVodTvItem.Where(vti.VideoItemId, videoItemId).FindOne()
+func GetVodTvItemByVideoItemId(videoItemId string) *entity.CrawlVodItem {
+	one, _ := dao.CrawlVodItem.Ctx(gctx.GetInitCtx()).Where(vti.VideoItemId, videoItemId).FindOne()
 	return one
 }
 
-func UpdateVodTVItemStatus(vodTvItem *model.CmsCrawlVodTvItem, status int) {
+func UpdateVodTVItemStatus(vodTvItem *entity.CrawlVodItem, status int) {
 	vodTvItem.CrawlStatus = status
 	vodTvItem.UpdateTime = gtime.Now()
-	dao.CrawlVodTvItem.Data(vodTvItem).Where(vti.Id, vodTvItem.Id).Update()
+	dao.CrawlVodItem.Ctx(gctx.GetInitCtx()).Data(vodTvItem).Where(vti.Id, vodTvItem.Id).Update()
 }

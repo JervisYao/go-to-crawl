@@ -1,9 +1,11 @@
 package crawl
 
 import (
+	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/text/gregex"
 	"github.com/gogf/gf/v2/text/gstr"
 	"go-to-crawl-vod/internal/dao"
+	"go-to-crawl-vod/internal/model/entity"
 	netUrl "net/url"
 	"strings"
 )
@@ -30,9 +32,8 @@ func GetProxyByUrl(requestUrl string) string {
 		host = gstr.SubStr(host, 0, index)
 	}
 	matches, _ := gregex.MatchString(regTop, host)
-	do, _ := dao.CrawlProxy.Where(C.TargetDomain, matches[0]).And(C.ProxyStatus, CrawProxyOpen).FindOne()
-	if do != nil {
-		return do.ProxyUrl
-	}
-	return ""
+
+	do := entity.CrawlProxy{}
+	_ = dao.CrawlProxy.Ctx(gctx.GetInitCtx()).Where(C.TargetDomain, matches[0]).Where(C.ProxyStatus, CrawProxyOpen).Scan(&do)
+	return do.ProxyUrl
 }

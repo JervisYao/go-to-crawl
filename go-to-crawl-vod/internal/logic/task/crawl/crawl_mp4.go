@@ -17,22 +17,22 @@ import (
 )
 
 func DownloadMp4Type1Task(ctx gctx.Ctx) {
-	doDownloadMp4(crawl.HostTypeCrawlLogin)
+	doDownloadMp4(crawl.BusinessTypeCrawlLogin)
 }
 
 func DownloadMp4Type2Task(ctx gctx.Ctx) {
-	doDownloadMp4(crawl.HostTypeNiVod)
+	doDownloadMp4(crawl.BusinessTypeNiVod)
 }
 
 func DownloadMp4Type3Task(ctx gctx.Ctx) {
 	if lock.IncreaseValue(lock.DownloadMp4Type3) {
 		defer lock.DecreaseValue(lock.DownloadMp4Type3)
-		doDownloadMp4(crawl.HostTypeBananTV)
+		doDownloadMp4(crawl.BusinessTypeBananTV)
 	}
 }
 
 func DownloadMp4Task(ctx gctx.Ctx) {
-	doDownloadMp4(crawl.HostTypeNormal)
+	doDownloadMp4(crawl.BusinessTypeNormal)
 }
 
 func doDownloadMp4(hostType int) {
@@ -95,7 +95,7 @@ func doDownloadMp4(hostType int) {
 		//更新成功後刪除原m3u8文件
 		gfile.Remove(orgM3U8File)
 
-		if crawl.HostTypeCrawlLogin == hostType {
+		if crawl.BusinessTypeCrawlLogin == hostType {
 			// 国内指定机器下载的，需要上传到国外点播服务器
 			//file.UpLoadToFastDFS(m3u8DO.MP4File, seed)
 		}

@@ -7,6 +7,9 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/tebeka/selenium"
 	"go-to-crawl-vod/internal/logic/task/dto"
+	"go-to-crawl-vod/internal/model/entity"
+	"go-to-crawl-vod/internal/service/crawl"
+	proxyServer "go-to-crawl-vod/internal/service/infra/browsermobproxy"
 	"go-to-crawl-vod/internal/service/infra/config"
 	"go-to-crawl-vod/internal/service/infra/lock"
 	"go-to-crawl-vod/utility/browsermob"
@@ -24,7 +27,7 @@ func (crawlUrl *CrawlUrl) CrawlUrlTask(ctx gctx.Ctx) {
 	}
 	defer lock.ReleaseLockSelenium()
 
-	seed := getEnvPreparedSeed("", crawl.HostTypeNormal)
+	seed := getEnvPreparedSeed("", crawl.BusinessTypeNormal)
 	if seed != nil {
 		DoStartCrawlVodFlow(seed)
 	}
@@ -37,31 +40,13 @@ func (crawlUrl *CrawlUrl) CrawlUrlType1Task(ctx gctx.Ctx) {
 	}
 	defer lock.ReleaseLockSelenium()
 
-	seed := getEnvPreparedSeed("", crawl.HostTypeCrawlLogin)
-	if seed != nil {
-		DoStartCrawlVodFlow(seed)
-	}
-}
-func (crawlUrl *CrawlUrl) CrawlUrlType2Task(ctx gctx.Ctx) {
-	if !lock.TryLockSelenium() {
-		return
-	}
-	defer lock.ReleaseLockSelenium()
-
-	seed := getEnvPreparedSeed("", crawl.HostTypeNiVod)
+	seed := getEnvPreparedSeed("", crawl.BusinessTypeCrawlLogin)
 	if seed != nil {
 		DoStartCrawlVodFlow(seed)
 	}
 }
 
-func (crawlUrl *CrawlUrl) CrawlUrlType3Task(ctx gctx.Ctx) {
-	seed := getEnvPreparedSeed("", crawl.HostTypeBananTV)
-	if seed != nil {
-		DoStartCrawlVodFlow(seed)
-	}
-}
-
-func getEnvPreparedSeed(hostname string, hostType int) *model.CmsCrawlQueue {
+func getEnvPreparedSeed(hostname string, hostType int) *entity.CrawlQueue {
 	seed := crawl.GetSeed(crawl.Init, hostname, hostType)
 	if seed == nil {
 		return nil
@@ -71,7 +56,7 @@ func getEnvPreparedSeed(hostname string, hostType int) *model.CmsCrawlQueue {
 	return seed
 }
 
-func DoStartCrawlVodFlow(seed *model.CmsCrawlQueue) {
+func DoStartCrawlVodFlow(seed *entity.CrawlQueue) {
 	ctx := new(dto.BrowserContext)
 	ctx.Log = g.Log().Line()
 	ctx.CrawlQueueSeed = seed
