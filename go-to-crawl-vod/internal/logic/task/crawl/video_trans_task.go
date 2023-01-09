@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	columns = dao.CmsUploadQueue.Columns
+	columns = dao.UploadQueue.Columns
 )
 
 // 把任务队列里的视频资源转换成M3U8格式视频资源
@@ -20,7 +20,7 @@ func TransformTask(ctx gctx.Ctx) {
 	//g.Dump("==============TransformTask================")
 	log := g.Log().Line()
 	//查找配置文件IP下正在转码的数据
-	tans, err := dao.CmsUploadQueue.Count(g.Map{
+	tans, err := dao.UploadQueue.Count(g.Map{
 		columns.UploadStatus: upload.Transforming,
 		columns.HostIp:       config.GetCrawlCfg("hostIp"),
 	})
@@ -36,7 +36,7 @@ func TransformTask(ctx gctx.Ctx) {
 	}
 
 	//查找数据库上传完毕状态的数据进行处理
-	queue, err := dao.CmsUploadQueue.FindOne(
+	queue, err := dao.UploadQueue.FindOne(
 		g.Map{
 			columns.UploadStatus: upload.Uploaded,
 			columns.HostIp:       config.GetCrawlCfg("hostIp"),
@@ -50,7 +50,7 @@ func TransformTask(ctx gctx.Ctx) {
 		return
 	}
 	queue.UploadStatus = upload.Transforming
-	_, err = dao.CmsUploadQueue.Data(queue).Where(columns.Id, queue.Id).Update()
+	_, err = dao.UploadQueue.Data(queue).Where(columns.Id, queue.Id).Update()
 	if err != nil {
 		g.Log().Infof(gctx.GetInitCtx(), "UploadStatusErr:%v,row:%v", err, queue)
 		return
@@ -77,7 +77,7 @@ func TransformTask(ctx gctx.Ctx) {
 		log.Infof(gctx.GetInitCtx(), "err:%v", err)
 		queue.UploadStatus = upload.TransformErr
 		queue.Msg = err.Error()
-		_, _ = dao.CmsUploadQueue.Data(queue).Where(columns.Id, queue.Id).Update()
+		_, _ = dao.UploadQueue.Data(queue).Where(columns.Id, queue.Id).Update()
 		return
 	}
 	//视频文件处理完毕
@@ -98,6 +98,6 @@ func TransformTask(ctx gctx.Ctx) {
 		}
 	}
 	queue.UpdateTime = gtime.Now()
-	_, _ = dao.CmsUploadQueue.Data(queue).Where(columns.Id, queue.Id).Update()
+	_, _ = dao.UploadQueue.Data(queue).Where(columns.Id, queue.Id).Update()
 
 }

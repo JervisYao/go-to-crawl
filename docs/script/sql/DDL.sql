@@ -120,3 +120,17 @@ CREATE TABLE `crawl_vod_item`
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB COMMENT ='爬取点播视频清单列表';
 
+CREATE TABLE `crawl_dict`
+(
+    `id`          bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `namespace`   varchar(20)         DEFAULT NULL COMMENT '命名空间',
+    `dict_key`    varchar(20)         DEFAULT NULL COMMENT '键名',
+    `dict_value`  varchar(200)        DEFAULT NULL COMMENT '键值',
+    `dict_sort`   int(11)    NOT NULL DEFAULT '0',
+    `dict_status` int(11)    NOT NULL DEFAULT '1' COMMENT '状态. 0-停用；1-启用',
+    `dict_desc`   varchar(20)         DEFAULT NULL COMMENT '描述',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB COMMENT ='爬虫字典表';
+
+
+

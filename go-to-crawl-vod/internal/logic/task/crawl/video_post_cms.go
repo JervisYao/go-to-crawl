@@ -14,7 +14,7 @@ func PostCmsTask(ctx gctx.Ctx) {
 
 	//os.Exit(1)
 	//查找数据库上传完毕状态的数据进行处理
-	queue, err := dao.CmsUploadQueue.FindOne(
+	queue, err := dao.UploadQueue.FindOne(
 		g.Map{
 			columns.UploadStatus: upload.Transformed,
 			columns.HostIp:       config.GetCrawlCfg("hostIp"),
@@ -39,7 +39,7 @@ func PostCmsTask(ctx gctx.Ctx) {
 				//通知cms返回成功则更新状态为CmsPostSuccess（方便后续做新定时任务检测状态为upload.Transformed但是请求cms不成功的 重新发送请求）
 				queue.UploadStatus = upload.CmsPostSuccess
 				queue.UpdateTime = gtime.Now()
-				_, _ = dao.CmsUploadQueue.Data(queue).Where(columns.Id, queue.Id).Update()
+				_, _ = dao.UploadQueue.Data(queue).Where(columns.Id, queue.Id).Update()
 			}
 		}
 	}

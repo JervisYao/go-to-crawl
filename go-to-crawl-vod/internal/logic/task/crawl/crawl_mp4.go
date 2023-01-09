@@ -8,6 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
+	"go-to-crawl-vod/internal/dao"
+	"go-to-crawl-vod/internal/service/crawl"
 	"go-to-crawl-vod/internal/service/infra/config"
 	"go-to-crawl-vod/internal/service/infra/lock"
 	"go-to-crawl-vod/utility/ffmpeg"
@@ -106,6 +108,6 @@ func doDownloadMp4(hostType int) {
 	upQueue.FileName = ffmpeg.OrgMp4Name
 	upQueue.UploadStatus = upload.Uploaded
 	upQueue.CreateTime = gtime.Now()
-	dao.CmsUploadQueue.Insert(upQueue)
+	dao.UploadQueue.Insert(upQueue)
 
 }

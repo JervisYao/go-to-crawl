@@ -10,6 +10,7 @@ import (
 	"github.com/tebeka/selenium"
 	"go-to-crawl-vod/internal/dao"
 	"go-to-crawl-vod/internal/logic/task/dto"
+	"go-to-crawl-vod/internal/service/crawl"
 	"go-to-crawl-vod/internal/service/infra/config"
 	"go-to-crawl-vod/internal/service/infra/lock"
 	"go-to-crawl-vod/utility/browsermob"
@@ -33,7 +34,7 @@ func (crawlUrl *crawlVodTVTask) GenVodConfigTask(ctx gctx.Ctx) {
 	configTask.TaskStatus = crawl.ConfigTaskStatusInit
 	configTask.CreateTime = gtime.Now()
 
-	dao.CmsCrawlVodConfigTask.Insert(configTask)
+	dao.CrawlVodConfigTask.Insert(configTask)
 
 }
 
@@ -160,7 +161,7 @@ func transToCrawlQueue(vodTv *model.CmsCrawlVodTv, vodTvItem *model.CmsCrawlVodT
 	crawlQueue.CrawlSeedParams = ""
 	crawlQueue.CreateTime = gtime.Now()
 
-	_, _ = dao.CmsCrawlQueue.Save(crawlQueue)
+	_, _ = dao.CrawlQueue.Save(crawlQueue)
 }
 func getCountryCodeByString(country string) string {
 	//大陆 香港 台湾 日本 韩国 欧美 泰国 新马 其它

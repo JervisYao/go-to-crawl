@@ -4,4 +4,4 @@ gfcli:
   gen:
     dao:
       - link: "mysql:root:root@tcp(172.27.178.58:3306)/go_to_crawl"
-        tables: "crawl_proxy, crawl_queue, crawl_vod, crawl_vod_config, crawl_vod_config_task, crawl_vod_item"
+        tables: "crawl_dict, crawl_proxy, crawl_queue, crawl_vod, crawl_vod_config, crawl_vod_config_task, crawl_vod_item"
