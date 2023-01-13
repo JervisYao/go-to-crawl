@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
-	"go-to-crawl-vod/internal/utils/process"
+	"go-to-crawl-vod/utility/processutil"
 	"net"
 	"os"
 	"runtime"
@@ -92,9 +92,9 @@ func (s *Server) Stop() {
 // hangingTooLong=true表示挂起太久
 func StopBrowserMobProxy(hangingTooLong bool) {
 	// 停止proxy-server进程
-	pid, _ := process.CheckProcessRunning("browsermob-proxy")
+	pid, _ := processutil.CheckProcessRunning("browsermob-proxy")
 	if pid != "" {
-		process.KillPid(pid)
+		processutil.KillPid(pid)
 		// 停止子进程
 		time.Sleep(time.Millisecond * 500)
 		g.Log().Line().Infof(gctx.GetInitCtx(), "StopBrowserMobProxy. hangingTooLong = %v, pid = %s", hangingTooLong, pid)

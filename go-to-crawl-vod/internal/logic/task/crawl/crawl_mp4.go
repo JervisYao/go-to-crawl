@@ -6,12 +6,10 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gfile"
-	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/gogf/gf/v2/util/gconv"
-	"go-to-crawl-vod/internal/dao"
 	"go-to-crawl-vod/internal/service/crawl"
 	"go-to-crawl-vod/internal/service/infra/config"
 	"go-to-crawl-vod/internal/service/infra/lock"
+	"go-to-crawl-vod/internal/service/video"
 	"go-to-crawl-vod/utility/ffmpegutil"
 	"go-to-crawl-vod/utility/fileutil"
 )
@@ -36,7 +34,7 @@ func DownloadMp4Task(ctx gctx.Ctx) {
 }
 
 func doDownloadMp4(hostType int) {
-	seed := crawl.GetSeed(crawl.CrawlFinish, config.GetCrawlHostIp(), hostType)
+	seed := crawl.GetSeed(crawl.CrawlFinish, config.GetCrawlHostLabel(), hostType)
 
 	if seed == nil {
 		return
@@ -54,13 +52,13 @@ func doDownloadMp4(hostType int) {
 
 	err := fileutil.DownloadM3U8File(seed.CrawlM3U8Url, proxyUrl, orgM3U8File, fileutil.Retry, seed.CrawlM3U8Text)
 	if err != nil {
-		log.Info(err)
+		log.Info(gctx.GetInitCtx(), err)
 		seed.ErrorMsg = "Download M3U8 Error"
 		crawl.UpdateStatus(seed, crawl.M3U8Err)
 		return
 	}
 	// 下载完M3U8后，后续操作都只能当前主机处理
-	seed.HostIp = config.GetCrawlHostIp()
+	seed.HostLabel = config.GetCrawlHostLabel()
 
 	if crawl.TypeMP4Url == seed.CrawlType {
 		// 直接下载MP4
@@ -78,7 +76,7 @@ func doDownloadMp4(hostType int) {
 		strategy := getCrawlVodFlowStrategy(seed)
 		m3u8DO, err2 := strategy.ConvertM3U8(seed, orgM3U8File)
 		if err2 != nil {
-			log.Info(err2)
+			log.Info(gctx.GetInitCtx(), err2)
 			seed.ErrorMsg = "标准化M3U8文件出错"
 			crawl.UpdateStatus(seed, crawl.M3U8Err)
 			return
@@ -102,12 +100,13 @@ func doDownloadMp4(hostType int) {
 	}
 
 	// 添加到转换队列
-	upQueue := new(model.CmsUploadQueue)
+	// TODO
+	/*upQueue := new(model.CmsUploadQueue)
 	gconv.Struct(seed, upQueue)
 	upQueue.Id = 0
 	upQueue.FileName = ffmpegutil.OrgMp4Name
 	upQueue.UploadStatus = upload.Uploaded
 	upQueue.CreateTime = gtime.Now()
-	dao.UploadQueue.Insert(upQueue)
+	dao.UploadQueue.Insert(upQueue)*/
 
 }

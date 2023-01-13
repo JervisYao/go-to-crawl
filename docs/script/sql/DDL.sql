@@ -132,5 +132,27 @@ CREATE TABLE `crawl_dict`
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB COMMENT ='爬虫字典表';
 
+CREATE TABLE `crawl_upload_queue`
+(
+    `id`            int(11)      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `host_ip`       varchar(50)           DEFAULT NULL,
+    `country_code`  varchar(10)  NOT NULL COMMENT '国家二字码.(eg: CN,US,SG等)',
+    `video_year`    int(11)      NOT NULL COMMENT '视频发布年份',
+    `video_coll_id` bigint(20)   NOT NULL DEFAULT '-1' COMMENT '视频集ID（视频集ID，不限于电视剧,-1代表单集视频，或者说电影）',
+    `video_item_id` bigint(20)            DEFAULT NULL COMMENT '视频集对应视频项ID（不限于电视剧的剧集）',
+    `file_name`     varchar(100) NOT NULL COMMENT '文件标题',
+    `file_type`     tinyint(4)   NOT NULL COMMENT '文件类型. 1-视频；2-大体积资源；（小文件无需用队列，直接用上传接口）',
+    `file_size`     bigint(20)   NOT NULL COMMENT '文件大小. 单位KB',
+    `msg`           varchar(255)          DEFAULT NULL,
+    `upload_status` tinyint(4)   NOT NULL COMMENT '上传状态.0-创建任务;1-上传中;2-上传完成;3-流媒体处理中;4-流媒体处理结束;5-流媒体处理异常',
+    `create_user`   int(11)               DEFAULT '0' COMMENT '添加人',
+    `create_time`   datetime              DEFAULT NULL COMMENT '添加时间',
+    `update_user`   int(11)               DEFAULT '0' COMMENT '更新人',
+    `update_time`   datetime              DEFAULT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB COMMENT ='文件上传队列'
+
+
+
 
 

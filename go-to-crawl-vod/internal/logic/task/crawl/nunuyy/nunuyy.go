@@ -2,9 +2,11 @@ package nunuyy
 
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/tebeka/selenium"
 	"go-to-crawl-vod/internal/logic/task/dto"
+	"go-to-crawl-vod/internal/model/entity"
 	"go-to-crawl-vod/utility/browsermobutil"
 	"go-to-crawl-vod/utility/ffmpegutil"
 	"go-to-crawl-vod/utility/httputil"
@@ -31,12 +33,12 @@ func (c *NunuyyCrawl) OpenBrowserWithParams(ctx *dto.BrowserContext, json *gjson
 	_ = ctx.Wd.WaitWithTimeout(selectorutil.GetXpathCondition(sliderXpath), gtime.S*30)
 	_ = ctx.Wd.Get(ctx.CrawlQueueSeed.CrawlSeedUrl)
 
-	resource := json.GetString("resource")
+	resource := json.Get("resource").String()
 	resource = "量子资源"
 	// 网站支持的资源列表
 	resElements, _ := ctx.Wd.FindElements(selenium.ByXPATH, "//*[@id='slider']//dt")
 	if len(resElements) == 0 {
-		ctx.Log.Error("不存在该资源：", resourceNameXpath)
+		ctx.Log.Error(gctx.GetInitCtx(), "不存在该资源：", resourceNameXpath)
 		return
 	}
 
@@ -58,7 +60,7 @@ func (c *NunuyyCrawl) OpenBrowserWithParams(ctx *dto.BrowserContext, json *gjson
 	videoItemElements, _ := resProgramElement.FindElements(selenium.ByXPATH, "ul/li")
 
 	// 通过节目名找到节目并点击
-	videoItemName := json.GetString("videoItem")
+	videoItemName := json.Get("videoItem").String()
 	for _, videoItemElement := range videoItemElements {
 		videoItemText, _ := videoItemElement.Text()
 		if videoItemName == videoItemText {
@@ -72,7 +74,7 @@ func (c *NunuyyCrawl) OpenBrowserWithParams(ctx *dto.BrowserContext, json *gjson
 	_ = ctx.Wd.WaitWithTimeout(selectorutil.GetXpathCondition(videoXpath), gtime.S*30)
 }
 
-func (c *NunuyyCrawl) ConvertM3U8(seed *model.CmsCrawlQueue, filePath string) (*ffmpegutil.M3u8DO, error) {
+func (c *NunuyyCrawl) ConvertM3U8(seed *entity.CrawlQueue, filePath string) (*ffmpegutil.M3u8DO, error) {
 	baseUrl := c.ConvertM3U8GetBaseUrl(seed.CrawlM3U8Url)
 	return ffmpegutil.ConvertM3U8(seed.CrawlSeedUrl, baseUrl, filePath)
 }
@@ -84,6 +86,6 @@ func (c *NunuyyCrawl) ConvertM3U8GetBaseUrl(m3u8Url string) string {
 func (c *NunuyyCrawl) FillTargetRequest(ctx *dto.BrowserContext) {
 	request := browsermobutil.GetHarRequestLocalRetry(ctx.XClient, ".m3u8", "")
 	if request != nil {
-		ctx.CrawlQueueSeed.CrawlM3U8Url = request.GetString("url")
+		ctx.CrawlQueueSeed.CrawlM3U8Url = request.Get("url").String()
 	}
 }

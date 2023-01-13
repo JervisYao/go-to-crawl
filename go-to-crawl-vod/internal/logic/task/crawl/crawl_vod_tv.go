@@ -13,6 +13,7 @@ import (
 	"go-to-crawl-vod/internal/model/entity"
 	"go-to-crawl-vod/internal/service/crawl"
 	"go-to-crawl-vod/internal/service/do"
+	"go-to-crawl-vod/internal/service/infra/browsermobproxy"
 	"go-to-crawl-vod/internal/service/infra/config"
 	"go-to-crawl-vod/internal/service/infra/lock"
 	"go-to-crawl-vod/utility/browsermobutil"
@@ -49,9 +50,9 @@ func (crawlUrl *crawlVodTVTask) VodTVTask(ctx gctx.Ctx) {
 	defer lock.ReleaseLockSelenium()
 	vodConfigTaskDO := crawl.GetVodConfigTaskDO()
 	if vodConfigTaskDO != nil {
-		crawl.UpdateVodConfigTaskStatus(vodConfigTaskDO.CmsCrawlVodConfigTask, crawl.ConfigTaskStatusProcessing)
+		crawl.UpdateVodConfigTaskStatus(vodConfigTaskDO.CrawlVodConfigTask, crawl.ConfigTaskStatusProcessing)
 		DoStartCrawlVodTV(vodConfigTaskDO)
-		crawl.UpdateVodConfigTaskStatus(vodConfigTaskDO.CmsCrawlVodConfigTask, crawl.ConfigTaskStatusOk)
+		crawl.UpdateVodConfigTaskStatus(vodConfigTaskDO.CrawlVodConfigTask, crawl.ConfigTaskStatusOk)
 	}
 }
 
@@ -86,18 +87,6 @@ func (crawlUrl *crawlVodTVTask) VodTVPadIdTask(ctx gctx.Ctx) {
 	}
 	crawl.UpdateVodTVStatus(vodTV, crawl.CrawlTVPadId)
 
-	addSubInfo := appoldcms.EpgCmsDb.GetSubclassFromVodTv(vodTV)
-	videoCollId, err := appoldcms.EpgCmsDb.AddSubClass(addSubInfo)
-	log.Infof(gctx.GetInitCtx(), "填充的剧集Id = %v", videoCollId)
-	if err != nil {
-		//	获取数据鼠标
-		log.Infof(gctx.GetInitCtx(), "新增剧集失败:%v", err)
-		crawl.UpdateVodTVStatus(vodTV, crawl.CrawlTVPadIdErr)
-		return
-	}
-
-	// 先填充剧集ID
-	vodTV.VideoCollId = videoCollId
 	log.Infof(gctx.GetInitCtx(), "更新vod tv. id = %v, to status = %v", vodTV.Id, crawl.CrawlTVPadIdOk)
 	crawl.UpdateVodTVStatus(vodTV, crawl.CrawlTVPadIdOk)
 }
@@ -111,7 +100,6 @@ func (crawlUrl *crawlVodTVTask) VodTVItemPadIdTask(ctx gctx.Ctx) {
 	}
 	vodTv := crawl.GetVodTvById(vodTVItem.TvId)
 
-	vodTVItem.VideoCollId = vodTv.VideoCollId // 修复异常情况
 	log.Infof(gctx.GetInitCtx(), "update vod tv item. id = %v, status = %v", vodTVItem.Id, vodTVItem.CrawlStatus)
 	crawl.UpdateVodTVItemStatus(vodTVItem, crawl.CrawlTVItemPadId)
 
@@ -123,20 +111,6 @@ func (crawlUrl *crawlVodTVTask) VodTVItemPadIdTask(ctx gctx.Ctx) {
 		return
 	}
 
-	var addSubInfo = modelOld.Subclass{
-		Id:       g.NewVar(vodTv.VideoCollId).Uint(),
-		Showname: vodTv.VideoName,
-	}
-
-	videoItemId, err := appoldcms.EpgCmsDb.AddSubClassCon(addSubInfo, vodTVItem.Episodes)
-	if err != nil {
-		//	获取数据鼠标
-		log.Infof(gctx.GetInitCtx(), "新增级数失败:%v", err)
-		crawl.UpdateVodTVItemStatus(vodTVItem, crawl.CrawlTVItemPadIdErr)
-		return
-	}
-
-	vodTVItem.VideoItemId = videoItemId
 	crawl.UpdateVodTVItemStatus(vodTVItem, crawl.CrawlTVItemPadIdOk)
 	transToCrawlQueue(vodTv, vodTVItem)
 }
@@ -156,7 +130,6 @@ func transToCrawlQueue(vodTv *entity.CrawlVod, vodTvItem *entity.CrawlVodItem) {
 
 	crawlQueue.VideoYear = gconv.Int(vodTv.VideoYear)
 	crawlQueue.VideoCollId = vodTv.VideoCollId
-	crawlQueue.VideoItemId = vodTvItem.VideoItemId
 	crawlQueue.CrawlType = crawl.QueueTypePageUrl
 	crawlQueue.CrawlStatus = crawl.Init
 	crawlQueue.CrawlSeedUrl = vodTvItem.SeedUrl
@@ -195,7 +168,7 @@ func DoStartCrawlVodTV(configTaskDO *do.CrawlVodConfigTaskDO) {
 	ctx := new(dto.BrowserContext)
 	ctx.Log = g.Log().Line()
 	ctx.VodConfigTaskDO = configTaskDO
-	strategy := getCrawlVodTVStrategy(ctx.VodConfigTaskDO.CmsCrawlVodConfig)
+	strategy := getCrawlVodTVStrategy(ctx.VodConfigTaskDO.CrawlVodConfig)
 	if strategy.UseBrowser() {
 		//g.Dump("使用浏览器")
 		service, _ := chromeutil.GetChromeDriverService(chromeutil.DriverServicePort)
@@ -210,7 +183,7 @@ func DoStartCrawlVodTV(configTaskDO *do.CrawlVodConfigTaskDO) {
 		caps := chromeutil.GetAllCapsChooseProxy(nil, proxyUrl)
 
 		if strategy.UseBrowserMobProxy() {
-			xServer := proxyServer.NewServer(config.GetCrawlCfg("browserProxyPath"))
+			xServer := browsermobproxy.NewServer(config.GetCrawlCfg("browserProxyPath"))
 			xServer.Start()
 			ctx.XServer = xServer
 			defer ctx.XServer.Stop()
@@ -225,15 +198,15 @@ func DoStartCrawlVodTV(configTaskDO *do.CrawlVodConfigTaskDO) {
 		webDriver, err := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", chromeutil.DriverServicePort))
 		ctx.Wd = webDriver
 		if ctx.Wd == nil {
-			ctx.VodConfigTaskDO.CmsCrawlVodConfig.ErrorMsg = "WebDriver Init Fail"
+			ctx.VodConfigTaskDO.CrawlVodConfig.ErrorMsg = "WebDriver Init Fail"
 			ctx.Log.Error(gctx.GetInitCtx(), err)
 			return
 		}
 		defer ctx.Wd.Quit()
 
 		// 业务处理-start
-		if ctx.VodConfigTaskDO.CmsCrawlVodConfig.SeedParams != "" {
-			json, _ := gjson.LoadJson(ctx.VodConfigTaskDO.CmsCrawlVodConfig.SeedParams)
+		if ctx.VodConfigTaskDO.CrawlVodConfig.SeedParams != "" {
+			json, _ := gjson.LoadJson(ctx.VodConfigTaskDO.CrawlVodConfig.SeedParams)
 			strategy.OpenBrowserWithParams(ctx, json)
 		} else {
 			if strategy.UseBrowserMobProxy() {
@@ -249,7 +222,7 @@ func DoStartCrawlVodTV(configTaskDO *do.CrawlVodConfigTaskDO) {
 	strategy.FillTargetRequest(ctx)
 }
 
-func DoStartCrawlVodPadInfo(vodTVItem *model.CmsCrawlVodTv) {
+func DoStartCrawlVodPadInfo(vodTVItem *entity.CrawlVod) {
 	ctx := new(dto.BrowserContext)
 	ctx.Log = g.Log().Line()
 	ctx.VodTV = vodTVItem
@@ -268,7 +241,7 @@ func DoStartCrawlVodPadInfo(vodTVItem *model.CmsCrawlVodTv) {
 		caps := chromeutil.GetAllCapsChooseProxy(nil, proxyUrl)
 
 		if strategy.UseBrowserMobProxy() {
-			xServer := proxyServer.NewServer(config.GetCrawlCfg("browserProxyPath"))
+			xServer := browsermobproxy.NewServer(config.GetCrawlCfg("browserProxyPath"))
 			xServer.Start()
 			ctx.XServer = xServer
 			defer ctx.XServer.Stop()

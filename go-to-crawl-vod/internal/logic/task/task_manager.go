@@ -1,11 +1,13 @@
 package task
 
 import (
+	"github.com/gogf/gf/v2/container/gvar"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcron"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/glog"
 	"go-to-crawl-vod/internal/logic/task/crawl"
+	crawlService "go-to-crawl-vod/internal/service/crawl"
 )
 
 func StartAllTask() {
@@ -16,7 +18,7 @@ func StartAllTask() {
 
 	vodTaskNameListVar, _ := g.Cfg().Get(gctx.GetInitCtx(), "server.openVodTaskList")
 
-	vodTaskNameList := vodTaskNameListVar.Slice()
+	vodTaskNameList := vodTaskNameListVar.Vars()
 	doStartAllTask(log, vodTaskNameList, taskMap)
 }
 
@@ -24,8 +26,6 @@ func registryAllTask(taskMap map[string]*taskBO) {
 	// QQ
 	registryTask(taskMap, "@every 1h", "checkQQLoginTask", crawl.CrawlCheckTask.CheckQQLoginTask)
 	registryTask(taskMap, "@every 5s", "crawlUrlType1Task", crawl.CrawlTask.CrawlUrlType1Task)
-	registryTask(taskMap, "@every 5s", "crawlUrlType2Task", crawl.CrawlTask.CrawlUrlType2Task)
-	registryTask(taskMap, "@every 5s", "crawlUrlType3Task", crawl.CrawlTask.CrawlUrlType3Task)
 	registryTask(taskMap, "@every 20s", "downloadMp4Type1Task", crawl.DownloadMp4Type1Task)
 	registryTask(taskMap, "@every 20s", "downloadMp4Type2Task", crawl.DownloadMp4Type2Task)
 	registryTask(taskMap, "@every 20s", "downloadMp4Type3Task", crawl.DownloadMp4Type3Task)
@@ -55,20 +55,18 @@ func registryAllTask(taskMap map[string]*taskBO) {
 	registryTask(taskMap, "@every 10s", "resetProcessingTask", crawlService.ResetProcessingTooLong)
 	// 重置正在爬取 (1)状态的记录
 	registryTask(taskMap, "@every 10s", "resetCrawlingTask", crawlService.ResetCrawlingTooLong)
-	// 查找转码完成没有post到cms成功的数据重新post
-	registryTask(taskMap, "@every 10s", "cheeckPostcms", crawl.PostCmsTask)
 	// 重置重试次数cnt>=3的所有记录
 	registryTask(taskMap, "@every 10m", "crawlUrlFailNotifyTask", crawl.CrawlCheckTask.CrawlUrlFailNotifyTask)
 }
 
-func doStartAllTask(log *glog.Logger, taskNameList []string, taskMap map[string]*taskBO) {
+func doStartAllTask(log *glog.Logger, taskNameList []*gvar.Var, taskMap map[string]*taskBO) {
 	//g.Dump(taskNameList)
 	if taskNameList == nil {
 		return
 	}
 
 	for _, taskName := range taskNameList {
-		taskItem := taskMap[taskName]
+		taskItem := taskMap[taskName.String()]
 		//g.Dump(taskMap)
 		if taskItem == nil {
 			continue

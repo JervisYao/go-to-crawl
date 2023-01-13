@@ -9,7 +9,7 @@ import (
 	"go-to-crawl-vod/internal/logic/task/dto"
 	"go-to-crawl-vod/internal/model/entity"
 	"go-to-crawl-vod/internal/service/crawl"
-	proxyServer "go-to-crawl-vod/internal/service/infra/browsermobproxy"
+	"go-to-crawl-vod/internal/service/infra/browsermobproxy"
 	"go-to-crawl-vod/internal/service/infra/config"
 	"go-to-crawl-vod/internal/service/infra/lock"
 	"go-to-crawl-vod/utility/browsermobutil"
@@ -69,7 +69,7 @@ func DoStartCrawlVodFlow(seed *entity.CrawlQueue) {
 		caps := chromeutil.GetAllCaps(nil)
 
 		if strategy.UseBrowserMobProxy() {
-			xServer := proxyServer.NewServer(config.GetCrawlCfg("browserProxyPath"))
+			xServer := browsermobproxy.NewServer(config.GetCrawlCfg("browserProxyPath"))
 			xServer.Start()
 			ctx.XServer = xServer
 			defer ctx.XServer.Stop()

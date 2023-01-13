@@ -73,7 +73,7 @@ func (crawl *BilibiliCrawl) FillTargetRequest(ctx *dto.BrowserContext) {
 		innerColl := colly.NewCollector()
 		innerColl.OnResponse(func(response *colly.Response) {
 			jsonObj := gjson.New(response.Body)
-			flvUrl := jsonObj.GetString("data.durl.0.url")
+			flvUrl := jsonObj.Get("data.durl.0.url").String()
 			ctx.Log.Infof(gctx.GetInitCtx(), "flv url = %s", flvUrl)
 
 			downloadBuilder := fileutil.CreateBuilder().Url(flvUrl).SaveFile("D:\\刘星\\bilibili.flv")

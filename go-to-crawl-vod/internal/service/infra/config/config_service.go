@@ -6,8 +6,8 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 )
 
-func GetCrawlHostIp() string {
-	return GetCrawlCfg("hostIp")
+func GetCrawlHostLabel() string {
+	return GetCrawlCfg("hostLabel")
 }
 
 func GetCrawlCfg(key string) string {

@@ -4,6 +4,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gtime"
+	"go-to-crawl-vod/internal/consts"
 	"go-to-crawl-vod/internal/dao"
 	"go-to-crawl-vod/internal/model/entity"
 	"go-to-crawl-vod/internal/service/infra/config"
@@ -27,15 +28,16 @@ func GetSeed(status int, hostLabel string, businessType int) *entity.CrawlQueue 
 }
 
 func GetNeedNotifySeedList() []*entity.CrawlQueue {
-	where := dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Where(c.CrawlM3U8Notify, CrawlM3U8NotifyNo).And("crawl_m3u8_cnt >= ?", constant.ServerMaxRetry)
-	all, _ := where.FindAll()
-	return all
+	where := dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Where(c.CrawlM3U8Notify, CrawlM3U8NotifyNo).WhereGTE(c.CrawlM3U8Url, consts.ServerMaxRetry)
+	all, _ := where.All()
+
+	return all.Array()
 }
 
 func ExistCrawling(hostType int) bool {
 	//爬虫状态为爬取中的数量大于0时 不继续
 	//需要新增条件限制host_type不同类型限制 避免互相冲突
-	count, _ := dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Where(c.HostType, hostType).Count(c.CrawlStatus, Crawling)
+	count, _ := dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Where(c.BusinessType, hostType).Count(c.CrawlStatus, Crawling)
 	return count > 0
 }
 
@@ -45,7 +47,7 @@ func UpdateStatus(seed *entity.CrawlQueue, status int) {
 	}
 	seed.CrawlStatus = status
 	seed.UpdateTime = gtime.Now()
-	dao.CrawlQueue.Data(seed).Where(c.Id, seed.Id).Update()
+	dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Data(seed).Where(c.Id, seed.Id).Update()
 }
 
 func UpdateUrlAndStatus(seed *entity.CrawlQueue) {
@@ -55,9 +57,9 @@ func UpdateUrlAndStatus(seed *entity.CrawlQueue) {
 	seed.CrawlM3U8Cnt = seed.CrawlM3U8Cnt + 1
 	seed.UpdateTime = gtime.Now()
 	if seed.CrawlM3U8Url == "" && seed.CrawlM3U8Text == "" {
-		if seed.CrawlM3U8Cnt >= constant.ServerMaxRetry {
+		if seed.CrawlM3U8Cnt >= consts.ServerMaxRetry {
 			// 超过允许重试的最大次数
-			seed.HostIp = config.GetCrawlHostIp()
+			seed.HostLabel = config.GetCrawlHostLabel()
 			if seed.ErrorMsg == "" {
 				seed.ErrorMsg = "M3U8 Empty"
 			}
@@ -71,19 +73,21 @@ func UpdateUrlAndStatus(seed *entity.CrawlQueue) {
 }
 
 // 重置处理中状态太久的
-func ResetProcessingTooLong() {
+func ResetProcessingTooLong(ctx gctx.Ctx) {
 	ResetHangingStatus(M3U8Parsing, CrawlFinish, 6*60)
 }
 
 // 重置抓取中状态太久的
-func ResetCrawlingTooLong() {
+func ResetCrawlingTooLong(ctx gctx.Ctx) {
 	ResetHangingStatus(Crawling, Init, 1)
 }
 
 // 重置挂起中的状态
 func ResetHangingStatus(fromStatus, toStatus, hangingMinutes int) {
 	waterMark := gtime.Now().Add(time.Duration(hangingMinutes) * -time.Minute)
-	seed, _ := dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Where("update_time < ", waterMark).FindOne(c.CrawlStatus, fromStatus)
+
+	var seed *entity.CrawlQueue
+	dao.CrawlQueue.Ctx(gctx.GetInitCtx()).WhereLT(c.UpdateTime, waterMark).Scan(&seed, c.CrawlStatus, fromStatus)
 	if seed == nil {
 		return
 	}
@@ -91,7 +95,7 @@ func ResetHangingStatus(fromStatus, toStatus, hangingMinutes int) {
 	UpdateStatus(seed, toStatus)
 }
 
-func ResetHostType2() {
+func ResetHostType2(ctx gctx.Ctx) {
 	//waterMark := gtime.Now().Add(time.Duration(hangingMinutes) * -time.Minute)
 	dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Where(g.Map{
 		"host_type = ?":                       2,

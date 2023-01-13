@@ -6,5 +6,5 @@ import (
 )
 
 func TestGetCrawlHostIp(t *testing.T) {
-	fmt.Println(GetCrawlHostIp())
+	fmt.Println(GetCrawlHostLabel())
 }
