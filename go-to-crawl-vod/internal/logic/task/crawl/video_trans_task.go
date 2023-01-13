@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-to-crawl-vod/internal/dao"
 	"go-to-crawl-vod/internal/service/infra/config"
-	"go-to-crawl-vod/utility/ffmpeg"
+	"go-to-crawl-vod/utility/ffmpegutil"
 	"path/filepath"
 )
 
@@ -70,7 +70,7 @@ func TransformTask(ctx gctx.Ctx) {
 	// mp4file 转换成MP4后的文件
 	mp4file := filepath.Join(finalFileDir, "segment.mp4")
 	//ffmpeg对象 转码切片在里面完成
-	ffm := ffmpeg.FmpegTrans("ffmpeg")
+	ffm := ffmpegutil.FmpegTrans("ffmpeg")
 	err = ffm.CheckFile(finalFileDir, finalFilePath, mp4file)
 	if err != nil {
 		//视频文件处理错误更新状态

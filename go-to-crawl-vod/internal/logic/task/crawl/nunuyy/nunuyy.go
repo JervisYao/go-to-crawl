@@ -5,10 +5,10 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/tebeka/selenium"
 	"go-to-crawl-vod/internal/logic/task/dto"
-	"go-to-crawl-vod/utility/browsermob"
-	"go-to-crawl-vod/utility/ffmpeg"
-	"go-to-crawl-vod/utility/http"
-	"go-to-crawl-vod/utility/selector"
+	"go-to-crawl-vod/utility/browsermobutil"
+	"go-to-crawl-vod/utility/ffmpegutil"
+	"go-to-crawl-vod/utility/httputil"
+	"go-to-crawl-vod/utility/selectorutil"
 	"time"
 )
 
@@ -23,12 +23,12 @@ type NunuyyCrawl struct {
 }
 
 func (c *NunuyyCrawl) OpenBrowser(ctx *dto.BrowserContext) {
-	_ = ctx.Wd.WaitWithTimeout(selector.GetXpathCondition(videoXpath), gtime.S*30)
+	_ = ctx.Wd.WaitWithTimeout(selectorutil.GetXpathCondition(videoXpath), gtime.S*30)
 	_ = ctx.Wd.Get(ctx.CrawlQueueSeed.CrawlSeedUrl)
 }
 
 func (c *NunuyyCrawl) OpenBrowserWithParams(ctx *dto.BrowserContext, json *gjson.Json) {
-	_ = ctx.Wd.WaitWithTimeout(selector.GetXpathCondition(sliderXpath), gtime.S*30)
+	_ = ctx.Wd.WaitWithTimeout(selectorutil.GetXpathCondition(sliderXpath), gtime.S*30)
 	_ = ctx.Wd.Get(ctx.CrawlQueueSeed.CrawlSeedUrl)
 
 	resource := json.GetString("resource")
@@ -63,26 +63,26 @@ func (c *NunuyyCrawl) OpenBrowserWithParams(ctx *dto.BrowserContext, json *gjson
 		videoItemText, _ := videoItemElement.Text()
 		if videoItemName == videoItemText {
 			_ = videoItemElement.Click()
-			browsermob.NewHarWait(ctx.Wd, ctx.XClient)
+			browsermobutil.NewHarWait(ctx.Wd, ctx.XClient)
 			time.Sleep(time.Second)
 		}
 	}
 
 	// 等待资源加载完成
-	_ = ctx.Wd.WaitWithTimeout(selector.GetXpathCondition(videoXpath), gtime.S*30)
+	_ = ctx.Wd.WaitWithTimeout(selectorutil.GetXpathCondition(videoXpath), gtime.S*30)
 }
 
-func (c *NunuyyCrawl) ConvertM3U8(seed *model.CmsCrawlQueue, filePath string) (*ffmpeg.M3u8DO, error) {
+func (c *NunuyyCrawl) ConvertM3U8(seed *model.CmsCrawlQueue, filePath string) (*ffmpegutil.M3u8DO, error) {
 	baseUrl := c.ConvertM3U8GetBaseUrl(seed.CrawlM3U8Url)
-	return ffmpeg.ConvertM3U8(seed.CrawlSeedUrl, baseUrl, filePath)
+	return ffmpegutil.ConvertM3U8(seed.CrawlSeedUrl, baseUrl, filePath)
 }
 
 func (c *NunuyyCrawl) ConvertM3U8GetBaseUrl(m3u8Url string) string {
-	return http.GetBaseUrlByBackslash(m3u8Url)
+	return httputil.GetBaseUrlByBackslash(m3u8Url)
 }
 
 func (c *NunuyyCrawl) FillTargetRequest(ctx *dto.BrowserContext) {
-	request := browsermob.GetHarRequestLocalRetry(ctx.XClient, ".m3u8", "")
+	request := browsermobutil.GetHarRequestLocalRetry(ctx.XClient, ".m3u8", "")
 	if request != nil {
 		ctx.CrawlQueueSeed.CrawlM3U8Url = request.GetString("url")
 	}

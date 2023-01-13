@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gproc"
-	"go-to-crawl-vod/utility/ffmpeg"
+	"go-to-crawl-vod/utility/ffmpegutil"
 	"testing"
 )
 
@@ -19,7 +19,7 @@ func TestFfmpegGproc(t *testing.T) {
 // 测试通过
 func TestFfmpegExec(t *testing.T) {
 	basePath := "D:\\cache2\\replay\\test"
-	err := ffmpeg.RunFfmpegGenericSlice(basePath)
+	err := ffmpegutil.RunFfmpegGenericSlice(basePath)
 	if err != nil {
 		fmt.Println(err.Error())
 	}

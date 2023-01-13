@@ -12,8 +12,8 @@ import (
 	proxyServer "go-to-crawl-vod/internal/service/infra/browsermobproxy"
 	"go-to-crawl-vod/internal/service/infra/config"
 	"go-to-crawl-vod/internal/service/infra/lock"
-	"go-to-crawl-vod/utility/browsermob"
-	"go-to-crawl-vod/utility/chrome"
+	"go-to-crawl-vod/utility/browsermobutil"
+	"go-to-crawl-vod/utility/chromeutil"
 )
 
 var CrawlTask = new(CrawlUrl)
@@ -63,10 +63,10 @@ func DoStartCrawlVodFlow(seed *entity.CrawlQueue) {
 	strategy := getCrawlVodFlowStrategy(ctx.CrawlQueueSeed)
 	if strategy.UseBrowser() {
 		//g.Dump("使用浏览器")
-		service, _ := chrome.GetChromeDriverService(chrome.DriverServicePort)
+		service, _ := chromeutil.GetChromeDriverService(chromeutil.DriverServicePort)
 		ctx.Service = service
 		defer ctx.Service.Stop()
-		caps := chrome.GetAllCaps(nil)
+		caps := chromeutil.GetAllCaps(nil)
 
 		if strategy.UseBrowserMobProxy() {
 			xServer := proxyServer.NewServer(config.GetCrawlCfg("browserProxyPath"))
@@ -78,10 +78,10 @@ func DoStartCrawlVodFlow(seed *entity.CrawlQueue) {
 			defer ctx.XClient.Close()
 
 			// BrowserMobProxy抓包方式
-			caps = chrome.GetAllCaps(proxy)
+			caps = chromeutil.GetAllCaps(proxy)
 		}
 
-		webDriver, err := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", chrome.DriverServicePort))
+		webDriver, err := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", chromeutil.DriverServicePort))
 		ctx.Wd = webDriver
 		if ctx.Wd == nil {
 			ctx.CrawlQueueSeed.ErrorMsg = "WebDriver Init Fail"
@@ -97,7 +97,7 @@ func DoStartCrawlVodFlow(seed *entity.CrawlQueue) {
 			strategy.OpenBrowserWithParams(ctx, json)
 		} else {
 			if strategy.UseBrowserMobProxy() {
-				browsermob.NewHarWait(ctx.Wd, ctx.XClient)
+				browsermobutil.NewHarWait(ctx.Wd, ctx.XClient)
 			}
 			//g.Dump("打开浏览器")
 			strategy.OpenBrowser(ctx)

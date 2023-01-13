@@ -1,4 +1,4 @@
-package selector
+package selectorutil
 
 import (
 	"github.com/gogf/gf/v2/text/gregex"

@@ -8,7 +8,7 @@ import (
 	"github.com/gogf/gf/v2/text/gregex"
 	"github.com/gogf/gf/v2/util/gconv"
 	"go-to-crawl-vod/internal/logic/task/dto"
-	"go-to-crawl-vod/utility/file"
+	"go-to-crawl-vod/utility/fileutil"
 	"strconv"
 )
 
@@ -76,9 +76,9 @@ func (crawl *BilibiliCrawl) FillTargetRequest(ctx *dto.BrowserContext) {
 			flvUrl := jsonObj.GetString("data.durl.0.url")
 			ctx.Log.Infof(gctx.GetInitCtx(), "flv url = %s", flvUrl)
 
-			downloadBuilder := file.CreateBuilder().Url(flvUrl).SaveFile("D:\\刘星\\bilibili.flv")
+			downloadBuilder := fileutil.CreateBuilder().Url(flvUrl).SaveFile("D:\\刘星\\bilibili.flv")
 			downloadBuilder.Header("Referer", ctx.CrawlQueueSeed.CrawlSeedUrl)
-			file.DownloadFileByBuilder(downloadBuilder)
+			fileutil.DownloadFileByBuilder(downloadBuilder)
 		})
 		url := "https://api.bilibili.com/x/player/playurl"
 		err = innerColl.Visit(fmt.Sprintf("%s?qn=80&avid=%d&cid=%d", url, wd.Aid, cid))

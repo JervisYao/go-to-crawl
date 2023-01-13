@@ -7,8 +7,8 @@ import (
 	"go-to-crawl-vod/internal/model/entity"
 	"go-to-crawl-vod/internal/service/do"
 	"go-to-crawl-vod/internal/service/infra/browsermobproxy"
-	"go-to-crawl-vod/utility/ffmpeg"
-	"go-to-crawl-vod/utility/http"
+	"go-to-crawl-vod/utility/ffmpegutil"
+	"go-to-crawl-vod/utility/httputil"
 )
 
 type BrowserContext struct {
@@ -28,9 +28,9 @@ type CrawlVodFlowInterface interface {
 	CrawlByBrowserInterface
 
 	// 下载视频接口集合
-	ConvertM3U8(seed *entity.CrawlQueue, filePath string) (*ffmpeg.M3u8DO, error)
+	ConvertM3U8(seed *entity.CrawlQueue, filePath string) (*ffmpegutil.M3u8DO, error)
 	ConvertM3U8GetBaseUrl(m3u8Url string) string
-	DownLoadToMp4(m3u8DO *ffmpeg.M3u8DO) error
+	DownLoadToMp4(m3u8DO *ffmpegutil.M3u8DO) error
 }
 
 type AbstractCrawlVodFlow struct {
@@ -59,15 +59,15 @@ func (r *AbstractCrawlVodFlow) OpenBrowserWithParams(ctx *BrowserContext, json *
 func (r *AbstractCrawlVodFlow) FillTargetRequest(ctx *BrowserContext) {
 }
 
-func (r *AbstractCrawlVodFlow) ConvertM3U8(seed *entity.CrawlQueue, filePath string) (*ffmpeg.M3u8DO, error) {
+func (r *AbstractCrawlVodFlow) ConvertM3U8(seed *entity.CrawlQueue, filePath string) (*ffmpegutil.M3u8DO, error) {
 	baseUrl := r.ConvertM3U8GetBaseUrl(seed.CrawlM3U8Url)
-	return ffmpeg.ConvertM3U8(seed.CrawlM3U8Url, baseUrl, filePath)
+	return ffmpegutil.ConvertM3U8(seed.CrawlM3U8Url, baseUrl, filePath)
 }
 
 func (r *AbstractCrawlVodFlow) ConvertM3U8GetBaseUrl(m3u8Url string) string {
-	return http.GetBaseUrlBySchema(m3u8Url)
+	return httputil.GetBaseUrlBySchema(m3u8Url)
 }
 
-func (r *AbstractCrawlVodFlow) DownLoadToMp4(m3u8DO *ffmpeg.M3u8DO) error {
-	return ffmpeg.DownLoadToMp4(m3u8DO)
+func (r *AbstractCrawlVodFlow) DownLoadToMp4(m3u8DO *ffmpegutil.M3u8DO) error {
+	return ffmpegutil.DownLoadToMp4(m3u8DO)
 }

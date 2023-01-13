@@ -1,4 +1,4 @@
-package ffmpeg
+package ffmpegutil
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/grand"
 	"go-to-crawl-vod/internal/service/infra/config"
-	"go-to-crawl-vod/utility/file"
+	"go-to-crawl-vod/utility/fileutil"
 	"io/fs"
 	"io/ioutil"
 	"net/http"
@@ -200,7 +200,7 @@ func downloadTsLine(m3u8DO *M3u8DO, lineDO StreamLineDO, proxyUrl string) error 
 	rand := grand.Intn(1000)
 	time.Sleep(time.Nanosecond * time.Duration(rand))
 	tsFilePath := m3u8DO.FromDir + gfile.Separator + lineDO.TransformedSrcName
-	err := file.DownloadFile(lineDO.TransformedLine, proxyUrl, tsFilePath, file.Retry)
+	err := fileutil.DownloadFile(lineDO.TransformedLine, proxyUrl, tsFilePath, fileutil.Retry)
 	truncateTS(tsFilePath, lineDO.SrcType, m3u8DO.PngHeaderSize)
 	return err
 }
@@ -391,7 +391,7 @@ func downloadResourceFile(m3u8DO *M3u8DO, m3u8LineDO StreamLineDO, proxyUrl stri
 
 	downloadUrl := m3u8DO.FromBaseUrl + fileName
 	saveFile := m3u8DO.FromDir + gfile.Separator + fileNameSimple
-	err := file.DownloadFile(downloadUrl, proxyUrl, saveFile, file.Retry)
+	err := fileutil.DownloadFile(downloadUrl, proxyUrl, saveFile, fileutil.Retry)
 
 	if m3u8LineDO.LineType == LineTypeKey {
 		m3u8DO.KeyOriginName = fileName

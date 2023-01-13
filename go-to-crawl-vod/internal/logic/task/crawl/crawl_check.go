@@ -8,8 +8,10 @@ import (
 	"github.com/gogf/gf/v2/text/gregex"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/tebeka/selenium"
-	"go-to-crawl-vod/utility/chrome"
-	"go-to-crawl-vod/utility/selector"
+	"go-to-crawl-vod/internal/service/crawl"
+	"go-to-crawl-vod/utility/chromeutil"
+	"go-to-crawl-vod/utility/selectorutil"
+	"go-to-crawl-vod/utility/timeutil"
 	"time"
 )
 
@@ -36,26 +38,26 @@ func (crawlUrl *crawlCheckTask) LoginQQManual() {
 func (crawlUrl *crawlCheckTask) LoginQQ(waitScan bool) {
 	log := g.Log().Line()
 	log.Info(gctx.GetInitCtx(), "开始检测腾讯视频VIP登录，过期状态")
-	service, _ := chrome.GetChromeDriverService(chrome.DriverServicePort)
+	service, _ := chromeutil.GetChromeDriverService(chromeutil.DriverServicePort)
 	defer service.Stop()
 
-	caps := chrome.GetAllCaps(nil)
-	webDriver, _ := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", chrome.DriverServicePort))
+	caps := chromeutil.GetAllCaps(nil)
+	webDriver, _ := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", chromeutil.DriverServicePort))
 	if webDriver == nil {
 		return
 	}
 	defer webDriver.Quit()
 
-	_ = webDriver.WaitWithTimeout(selector.GetXpathCondition(vipDescXpath), gtime.S*30)
+	_ = webDriver.WaitWithTimeout(selectorutil.GetXpathCondition(vipDescXpath), gtime.S*30)
 	_ = webDriver.Get(vipHistoryPage)
 
-	vipDesc := selector.GetTextByXpath(webDriver, vipDescXpath)
+	vipDesc := selectorutil.GetTextByXpath(webDriver, vipDescXpath)
 
 	// 1、检测腾讯视频是否登录, 是否是VIP，是否马上到期
 	if gstr.Contains(vipDesc, "到期") {
 		// 是VIP
 		dateStr, _ := gregex.MatchString("(\\d{4}-\\d{2}-\\d{2})", vipDesc)
-		expireDate := gtime.ParseTimeFromContent(dateStr[1], timeUtil.YYYY_MM_DD)
+		expireDate := gtime.ParseTimeFromContent(dateStr[1], timeutil.YYYY_MM_DD)
 
 		milliSeconds := expireDate.TimestampMilli() - gtime.TimestampMilli()
 		expireDay := milliSeconds / gtime.D.Milliseconds()

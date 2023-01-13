@@ -6,9 +6,9 @@ import (
 	"github.com/tebeka/selenium"
 	"go-to-crawl-vod/internal/logic/task/dto"
 	"go-to-crawl-vod/internal/service/infra/config"
-	"go-to-crawl-vod/utility/browsermob"
-	"go-to-crawl-vod/utility/chrome"
-	"go-to-crawl-vod/utility/process"
+	"go-to-crawl-vod/utility/browsermobutil"
+	"go-to-crawl-vod/utility/chromeutil"
+	"go-to-crawl-vod/utility/processutil"
 )
 
 var BrowserTask = new(browser)
@@ -19,7 +19,7 @@ type browser struct {
 // 测试web容器环境下多次打开和关闭浏览器代理是否会暂停应用
 func (crawlUrl *browser) Start() {
 
-	pid, _ := process.CheckRunning(proxyServer.PORT)
+	pid, _ := processutil.CheckRunning(proxyServer.PORT)
 	if pid != "" {
 		return
 	}
@@ -27,7 +27,7 @@ func (crawlUrl *browser) Start() {
 	ctx := new(dto.BrowserContext)
 	ctx.Log = g.Log().Line()
 
-	service, _ := chrome.GetChromeDriverService(chrome.DriverServicePort)
+	service, _ := chromeutil.GetChromeDriverService(chromeutil.DriverServicePort)
 	ctx.Service = service
 	defer ctx.Service.Stop()
 
@@ -40,9 +40,9 @@ func (crawlUrl *browser) Start() {
 	defer ctx.XClient.Close()
 
 	// BrowserMobProxy抓包方式
-	caps := chrome.GetAllCaps(proxy)
+	caps := chromeutil.GetAllCaps(proxy)
 
-	webDriver, _ := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", chrome.DriverServicePort))
+	webDriver, _ := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", chromeutil.DriverServicePort))
 	ctx.Wd = webDriver
 	if ctx.Wd == nil {
 		ctx.CrawlQueueSeed.ErrorMsg = "WebDriver Init Fail"
@@ -50,7 +50,7 @@ func (crawlUrl *browser) Start() {
 	}
 	defer ctx.Wd.Quit()
 
-	browsermob.NewHarWait(ctx.Wd, ctx.XClient)
+	browsermobutil.NewHarWait(ctx.Wd, ctx.XClient)
 	_ = ctx.Wd.Get("https://www.tangrenjie.tv/vod/play/id/214425/sid/1/nid/1.html")
-	browsermob.GetHarRequest(ctx.XClient, ".m3u8", "", 5)
+	browsermobutil.GetHarRequest(ctx.XClient, ".m3u8", "", 5)
 }

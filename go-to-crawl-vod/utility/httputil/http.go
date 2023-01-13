@@ -1,4 +1,4 @@
-package http
+package httputil
 
 import (
 	"github.com/gogf/gf/v2/net/ghttp"

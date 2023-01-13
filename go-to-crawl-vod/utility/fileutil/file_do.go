@@ -1,4 +1,4 @@
-package file
+package fileutil
 
 const (
 	POST = "POST"

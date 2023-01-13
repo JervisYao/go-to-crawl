@@ -12,8 +12,8 @@ import (
 	"go-to-crawl-vod/internal/service/crawl"
 	"go-to-crawl-vod/internal/service/infra/config"
 	"go-to-crawl-vod/internal/service/infra/lock"
-	"go-to-crawl-vod/utility/ffmpeg"
-	"go-to-crawl-vod/utility/file"
+	"go-to-crawl-vod/utility/ffmpegutil"
+	"go-to-crawl-vod/utility/fileutil"
 )
 
 func DownloadMp4Type1Task(ctx gctx.Ctx) {
@@ -49,10 +49,10 @@ func doDownloadMp4(hostType int) {
 	_ = gfile.Mkdir(videoDir)
 
 	// 下载M3U8文件
-	orgM3U8File := videoDir + ffmpeg.OrgM3U8Name
+	orgM3U8File := videoDir + ffmpegutil.OrgM3U8Name
 	proxyUrl := crawl.GetProxyByUrl(seed.CrawlM3U8Url)
 
-	err := file.DownloadM3U8File(seed.CrawlM3U8Url, proxyUrl, orgM3U8File, file.Retry, seed.CrawlM3U8Text)
+	err := fileutil.DownloadM3U8File(seed.CrawlM3U8Url, proxyUrl, orgM3U8File, fileutil.Retry, seed.CrawlM3U8Text)
 	if err != nil {
 		log.Info(err)
 		seed.ErrorMsg = "Download M3U8 Error"
@@ -64,10 +64,10 @@ func doDownloadMp4(hostType int) {
 
 	if crawl.TypeMP4Url == seed.CrawlType {
 		// 直接下载MP4
-		builder := file.CreateBuilder()
+		builder := fileutil.CreateBuilder()
 		builder.Url(seed.CrawlSeedUrl)
-		builder.SaveFile(fmt.Sprintf("%s%s", videoDir, ffmpeg.OrgMp4Name))
-		err2 := file.DownloadFileByBuilder(builder)
+		builder.SaveFile(fmt.Sprintf("%s%s", videoDir, ffmpegutil.OrgMp4Name))
+		err2 := fileutil.DownloadFileByBuilder(builder)
 		if err2 != nil {
 			video.UpdateDownloadStatus(seed, errors.New("MP4下载失败"))
 			return
@@ -105,7 +105,7 @@ func doDownloadMp4(hostType int) {
 	upQueue := new(model.CmsUploadQueue)
 	gconv.Struct(seed, upQueue)
 	upQueue.Id = 0
-	upQueue.FileName = ffmpeg.OrgMp4Name
+	upQueue.FileName = ffmpegutil.OrgMp4Name
 	upQueue.UploadStatus = upload.Uploaded
 	upQueue.CreateTime = gtime.Now()
 	dao.UploadQueue.Insert(upQueue)

@@ -15,8 +15,8 @@ import (
 	"go-to-crawl-vod/internal/service/do"
 	"go-to-crawl-vod/internal/service/infra/config"
 	"go-to-crawl-vod/internal/service/infra/lock"
-	"go-to-crawl-vod/utility/browsermob"
-	"go-to-crawl-vod/utility/chrome"
+	"go-to-crawl-vod/utility/browsermobutil"
+	"go-to-crawl-vod/utility/chromeutil"
 )
 
 var CrawlVodTVTask = new(crawlVodTVTask)
@@ -198,7 +198,7 @@ func DoStartCrawlVodTV(configTaskDO *do.CrawlVodConfigTaskDO) {
 	strategy := getCrawlVodTVStrategy(ctx.VodConfigTaskDO.CmsCrawlVodConfig)
 	if strategy.UseBrowser() {
 		//g.Dump("使用浏览器")
-		service, _ := chrome.GetChromeDriverService(chrome.DriverServicePort)
+		service, _ := chromeutil.GetChromeDriverService(chromeutil.DriverServicePort)
 		ctx.Service = service
 		defer ctx.Service.Stop()
 
@@ -207,7 +207,7 @@ func DoStartCrawlVodTV(configTaskDO *do.CrawlVodConfigTaskDO) {
 			proxyUrl = crawl.GetRandomProxyUrl()
 			ctx.Log.Infof(gctx.GetInitCtx(), "visit list page via proxy. domain = %v, proxy = %v", configTaskDO.DomainKeyPart, proxyUrl)
 		}
-		caps := chrome.GetAllCapsChooseProxy(nil, proxyUrl)
+		caps := chromeutil.GetAllCapsChooseProxy(nil, proxyUrl)
 
 		if strategy.UseBrowserMobProxy() {
 			xServer := proxyServer.NewServer(config.GetCrawlCfg("browserProxyPath"))
@@ -219,10 +219,10 @@ func DoStartCrawlVodTV(configTaskDO *do.CrawlVodConfigTaskDO) {
 			defer ctx.XClient.Close()
 
 			// BrowserMobProxy抓包方式
-			caps = chrome.GetAllCaps(proxy)
+			caps = chromeutil.GetAllCaps(proxy)
 		}
 
-		webDriver, err := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", chrome.DriverServicePort))
+		webDriver, err := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", chromeutil.DriverServicePort))
 		ctx.Wd = webDriver
 		if ctx.Wd == nil {
 			ctx.VodConfigTaskDO.CmsCrawlVodConfig.ErrorMsg = "WebDriver Init Fail"
@@ -237,7 +237,7 @@ func DoStartCrawlVodTV(configTaskDO *do.CrawlVodConfigTaskDO) {
 			strategy.OpenBrowserWithParams(ctx, json)
 		} else {
 			if strategy.UseBrowserMobProxy() {
-				browsermob.NewHarWait(ctx.Wd, ctx.XClient)
+				browsermobutil.NewHarWait(ctx.Wd, ctx.XClient)
 			}
 			//g.Dump("打开浏览器")
 			strategy.OpenBrowser(ctx)
@@ -256,7 +256,7 @@ func DoStartCrawlVodPadInfo(vodTVItem *model.CmsCrawlVodTv) {
 	strategy := getCrawlVodPadInfoStrategy(ctx.VodTV)
 	if strategy.UseBrowser() {
 		//g.Dump("使用浏览器")
-		service, _ := chrome.GetChromeDriverService(chrome.DriverServicePort)
+		service, _ := chromeutil.GetChromeDriverService(chromeutil.DriverServicePort)
 		ctx.Service = service
 		defer ctx.Service.Stop()
 
@@ -265,7 +265,7 @@ func DoStartCrawlVodPadInfo(vodTVItem *model.CmsCrawlVodTv) {
 			proxyUrl = crawl.GetRandomProxyUrl()
 			ctx.Log.Infof(gctx.GetInitCtx(), "visit detail page via proxy. id = %v, proxy = %v", vodTVItem.Id, proxyUrl)
 		}
-		caps := chrome.GetAllCapsChooseProxy(nil, proxyUrl)
+		caps := chromeutil.GetAllCapsChooseProxy(nil, proxyUrl)
 
 		if strategy.UseBrowserMobProxy() {
 			xServer := proxyServer.NewServer(config.GetCrawlCfg("browserProxyPath"))
@@ -277,10 +277,10 @@ func DoStartCrawlVodPadInfo(vodTVItem *model.CmsCrawlVodTv) {
 			defer ctx.XClient.Close()
 
 			// BrowserMobProxy抓包方式
-			caps = chrome.GetAllCaps(proxy)
+			caps = chromeutil.GetAllCaps(proxy)
 		}
 
-		webDriver, err := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", chrome.DriverServicePort))
+		webDriver, err := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d/wd/hub", chromeutil.DriverServicePort))
 		ctx.Wd = webDriver
 		if ctx.Wd == nil {
 			ctx.VodTVItem.ErrorMsg = "WebDriver Init Fail"
@@ -291,7 +291,7 @@ func DoStartCrawlVodPadInfo(vodTVItem *model.CmsCrawlVodTv) {
 
 		// 业务处理-start
 		if strategy.UseBrowserMobProxy() {
-			browsermob.NewHarWait(ctx.Wd, ctx.XClient)
+			browsermobutil.NewHarWait(ctx.Wd, ctx.XClient)
 		}
 		strategy.OpenBrowser(ctx)
 		// 业务处理-end

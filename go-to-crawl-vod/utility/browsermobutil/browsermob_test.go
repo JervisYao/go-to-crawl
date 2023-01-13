@@ -1,4 +1,4 @@
-package browsermob
+package browsermobutil
 
 import (
 	"fmt"

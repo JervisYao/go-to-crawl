@@ -1,4 +1,4 @@
-package chrome
+package chromeutil
 
 import (
 	"github.com/corpix/uarand"

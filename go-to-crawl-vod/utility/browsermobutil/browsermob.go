@@ -1,4 +1,4 @@
-package browsermob
+package browsermobutil
 
 import (
 	"fmt"
@@ -11,8 +11,9 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/tebeka/selenium"
 	"go-to-crawl-vod/internal/consts"
+	"go-to-crawl-vod/internal/service/crawl"
 	"go-to-crawl-vod/internal/service/infra/browsermobproxy"
-	"go-to-crawl-vod/utility/file"
+	"go-to-crawl-vod/utility/fileutil"
 	"io"
 	"time"
 )
@@ -57,18 +58,18 @@ func GetHarRequestArray(proxy *browsermobproxy.Client, patternUrl string, patter
 			log.Info(gctx.GetInitCtx(), rspContent)
 			proxyUrl := crawl.GetProxyByUrl(reqUrl)
 
-			builder := file.CreateBuilder().Url(reqUrl).Proxy(proxyUrl).Retry(file.Retry)
+			builder := fileutil.CreateBuilder().Url(reqUrl).Proxy(proxyUrl).Retry(fileutil.Retry)
 
 			method := reqJson.Get("method").String()
 			builder = builder.Method(method)
 
-			if file.POST == method {
+			if fileutil.POST == method {
 				// 使用原始header先对post开放，实际上get也适用
 				builder = initHeaderFromHarItem(builder, reqJson)
 				builder = builder.Body(reqJson.Get("postData.text").String())
 			}
 
-			body := file.DownloadToReaderByBuilder(builder)
+			body := fileutil.DownloadToReaderByBuilder(builder)
 			if body == nil {
 				continue
 			}
@@ -152,7 +153,7 @@ func printTargetUrl(targetRequestArray []*gjson.Json) {
 	}
 }
 
-func initHeaderFromHarItem(builder *file.DownloadBuilder, reqJson *gjson.Json) *file.DownloadBuilder {
+func initHeaderFromHarItem(builder *fileutil.DownloadBuilder, reqJson *gjson.Json) *fileutil.DownloadBuilder {
 	headers := reqJson.Get("headers").Map()
 	for _, headerMap := range headers {
 		headerJson := gjson.New(headerMap)

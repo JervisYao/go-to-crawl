@@ -1,4 +1,4 @@
-package ffmpeg
+package ffmpegutil
 
 const (
 	LineTypeComment = 1 // 注解行
