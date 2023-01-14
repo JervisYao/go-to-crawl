@@ -8,7 +8,6 @@ import (
 	"testing"
 )
 
-
 func TestNunuyy(t *testing.T) {
 	doStartTmpSeed("https://www.nunuyy3.org/dongman/102123.html")
 }
@@ -28,10 +27,6 @@ func TestBilibili(t *testing.T) {
 
 func TestCrawlUrlType1Task(t *testing.T) {
 	CrawlTask.CrawlUrlType1Task(nil)
-}
-
-func TestCrawlUrlType2Task(t *testing.T) {
-	CrawlTask.CrawlUrlType2Task(nil)
 }
 
 func doStartTmpSeed(url string) {

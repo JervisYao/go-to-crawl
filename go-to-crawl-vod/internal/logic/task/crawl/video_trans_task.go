@@ -6,13 +6,16 @@ import (
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-to-crawl-vod/internal/dao"
+	"go-to-crawl-vod/internal/model/entity"
 	"go-to-crawl-vod/internal/service/infra/config"
+	"go-to-crawl-vod/internal/service/upload"
+	"go-to-crawl-vod/internal/service/video"
 	"go-to-crawl-vod/utility/ffmpegutil"
 	"path/filepath"
 )
 
 var (
-	columns = dao.UploadQueue.Columns
+	columns = dao.CrawlUploadQueue.Columns()
 )
 
 // 把任务队列里的视频资源转换成M3U8格式视频资源
@@ -20,7 +23,7 @@ func TransformTask(ctx gctx.Ctx) {
 	//g.Dump("==============TransformTask================")
 	log := g.Log().Line()
 	//查找配置文件IP下正在转码的数据
-	tans, err := dao.UploadQueue.Count(g.Map{
+	tans, err := dao.CrawlUploadQueue.Ctx(gctx.GetInitCtx()).Count(g.Map{
 		columns.UploadStatus: upload.Transforming,
 		columns.HostIp:       config.GetCrawlCfg("hostIp"),
 	})
@@ -35,8 +38,9 @@ func TransformTask(ctx gctx.Ctx) {
 		return
 	}
 
+	var queue *entity.CrawlUploadQueue
 	//查找数据库上传完毕状态的数据进行处理
-	queue, err := dao.UploadQueue.FindOne(
+	dao.CrawlUploadQueue.Ctx(gctx.GetInitCtx()).Scan(&queue,
 		g.Map{
 			columns.UploadStatus: upload.Uploaded,
 			columns.HostIp:       config.GetCrawlCfg("hostIp"),
@@ -50,7 +54,7 @@ func TransformTask(ctx gctx.Ctx) {
 		return
 	}
 	queue.UploadStatus = upload.Transforming
-	_, err = dao.UploadQueue.Data(queue).Where(columns.Id, queue.Id).Update()
+	_, err = dao.CrawlUploadQueue.Ctx(gctx.GetInitCtx()).Data(queue).Where(columns.Id, queue.Id).Update()
 	if err != nil {
 		g.Log().Infof(gctx.GetInitCtx(), "UploadStatusErr:%v,row:%v", err, queue)
 		return
@@ -77,7 +81,7 @@ func TransformTask(ctx gctx.Ctx) {
 		log.Infof(gctx.GetInitCtx(), "err:%v", err)
 		queue.UploadStatus = upload.TransformErr
 		queue.Msg = err.Error()
-		_, _ = dao.UploadQueue.Data(queue).Where(columns.Id, queue.Id).Update()
+		_, _ = dao.CrawlUploadQueue.Ctx(gctx.GetInitCtx()).Data(queue).Where(columns.Id, queue.Id).Update()
 		return
 	}
 	//视频文件处理完毕
@@ -98,6 +102,6 @@ func TransformTask(ctx gctx.Ctx) {
 		}
 	}
 	queue.UpdateTime = gtime.Now()
-	_, _ = dao.UploadQueue.Data(queue).Where(columns.Id, queue.Id).Update()
+	_, _ = dao.CrawlUploadQueue.Ctx(gctx.GetInitCtx()).Data(queue).Where(columns.Id, queue.Id).Update()
 
 }

@@ -29,9 +29,11 @@ func GetSeed(status int, hostLabel string, businessType int) *entity.CrawlQueue 
 
 func GetNeedNotifySeedList() []*entity.CrawlQueue {
 	where := dao.CrawlQueue.Ctx(gctx.GetInitCtx()).Where(c.CrawlM3U8Notify, CrawlM3U8NotifyNo).WhereGTE(c.CrawlM3U8Url, consts.ServerMaxRetry)
-	all, _ := where.All()
 
-	return all.Array()
+	var array []*entity.CrawlQueue
+	where.ScanList(&array, "CrawlQueue")
+
+	return array
 }
 
 func ExistCrawling(hostType int) bool {
