@@ -13,7 +13,7 @@ import (
 type CrawlUploadQueue struct {
 	g.Meta       `orm:"table:crawl_upload_queue, do:true"`
 	Id           interface{} // 主键ID
-	HostIp       interface{} //
+	HostLabel    interface{} //
 	CountryCode  interface{} // 国家二字码.(eg: CN,US,SG等)
 	VideoYear    interface{} // 视频发布年份
 	VideoCollId  interface{} // 视频集ID（视频集ID，不限于电视剧,-1代表单集视频，或者说电影）

@@ -9,12 +9,12 @@ import (
 )
 
 func TestNunuyy(t *testing.T) {
-	doStartTmpSeed("https://www.nunuyy3.org/dongman/102123.html")
+	doStartTmpSeed("https://www.nunuyy5.org/dongman/102123.html")
 }
 
 func TestNunuyyWithParams(t *testing.T) {
 	seed := new(entity.CrawlQueue)
-	seed.CrawlSeedUrl = "https://www.nunuyy3.org/dongman/102123.html"
+	seed.CrawlSeedUrl = "https://www.nunuyy5.org/dongman/102123.html"
 	// 努努大部分资源都支持量子资源，且量子资源的m3u8未加密，因此videoItem需要切换到量子资源下的节目单来摘录到数据库
 	seed.CrawlSeedParams = `{"videoItem":"第25集"}`
 	DoStartCrawlVodFlow(seed)

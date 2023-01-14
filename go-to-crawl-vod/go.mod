@@ -12,6 +12,7 @@ require (
 
 // 重要组件
 require (
+    github.com/gogf/gf/contrib/drivers/mysql/v2 v2.1.4
     github.com/tebeka/selenium v0.9.9
 )
 

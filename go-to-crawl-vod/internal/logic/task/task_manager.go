@@ -16,7 +16,7 @@ func StartAllTask() {
 	taskMap := make(map[string]*taskBO)
 	registryAllTask(taskMap)
 
-	vodTaskNameListVar, _ := g.Cfg().Get(gctx.GetInitCtx(), "server.openVodTaskList")
+	vodTaskNameListVar, _ := g.Cfg().Get(gctx.GetInitCtx(), "crawl.openVodTaskList")
 
 	vodTaskNameList := vodTaskNameListVar.Vars()
 	doStartAllTask(log, vodTaskNameList, taskMap)

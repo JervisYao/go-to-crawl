@@ -25,13 +25,13 @@ type NunuyyCrawl struct {
 }
 
 func (c *NunuyyCrawl) OpenBrowser(ctx *dto.BrowserContext) {
-	_ = ctx.Wd.WaitWithTimeout(selectorutil.GetXpathCondition(videoXpath), gtime.S*30)
 	_ = ctx.Wd.Get(ctx.CrawlQueueSeed.CrawlSeedUrl)
+	_ = ctx.Wd.WaitWithTimeout(selectorutil.GetXpathCondition(videoXpath), gtime.S*30)
 }
 
 func (c *NunuyyCrawl) OpenBrowserWithParams(ctx *dto.BrowserContext, json *gjson.Json) {
-	_ = ctx.Wd.WaitWithTimeout(selectorutil.GetXpathCondition(sliderXpath), gtime.S*30)
 	_ = ctx.Wd.Get(ctx.CrawlQueueSeed.CrawlSeedUrl)
+	_ = ctx.Wd.WaitWithTimeout(selectorutil.GetXpathCondition(sliderXpath), gtime.S*30)
 
 	resource := json.Get("resource").String()
 	resource = "量子资源"

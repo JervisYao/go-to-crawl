@@ -10,7 +10,10 @@ import (
 	"github.com/gogf/gf/v2/text/gregex"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/grand"
+	"go-to-crawl-vod/internal/model/entity"
+	"go-to-crawl-vod/internal/service/crawl"
 	"go-to-crawl-vod/internal/service/infra/config"
+	"go-to-crawl-vod/internal/service/video"
 	"go-to-crawl-vod/utility/fileutil"
 	"io/fs"
 	"io/ioutil"
@@ -265,7 +268,7 @@ func IsPngType(tsPath string) bool {
 }
 
 // 过期方法不建议使用(1、ffmpeg直接下载会卡死；2、不支持代理选项)
-func DownloadSeed(log *glog.Logger, seed *model.CmsCrawlQueue) error {
+func DownloadSeed(log *glog.Logger, seed *entity.CrawlQueue) error {
 	videoDir := video.GetVideoDir(seed.CountryCode, seed.VideoYear, seed.VideoCollId, seed.VideoItemId)
 	orgMP4Path := videoDir + OrgMp4Name
 	orgM3U8Path := videoDir + OrgM3U8Name

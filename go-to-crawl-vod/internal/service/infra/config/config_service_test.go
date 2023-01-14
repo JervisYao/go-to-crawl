@@ -1,10 +1,11 @@
 package config
 
 import (
-	"fmt"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"testing"
 )
 
-func TestGetCrawlHostIp(t *testing.T) {
-	fmt.Println(GetCrawlHostLabel())
+func TestGetCrawlHostLabel(t *testing.T) {
+	g.Log().Infof(gctx.GetInitCtx(), GetCrawlHostLabel())
 }

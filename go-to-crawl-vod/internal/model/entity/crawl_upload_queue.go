@@ -11,7 +11,7 @@ import (
 // CrawlUploadQueue is the golang structure for table crawl_upload_queue.
 type CrawlUploadQueue struct {
 	Id           int         `json:"id"           ` // 主键ID
-	HostIp       string      `json:"hostIp"       ` //
+	HostLabel    string      `json:"hostLabel"    ` //
 	CountryCode  string      `json:"countryCode"  ` // 国家二字码.(eg: CN,US,SG等)
 	VideoYear    int         `json:"videoYear"    ` // 视频发布年份
 	VideoCollId  int64       `json:"videoCollId"  ` // 视频集ID（视频集ID，不限于电视剧,-1代表单集视频，或者说电影）

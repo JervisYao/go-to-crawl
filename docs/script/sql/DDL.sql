@@ -135,7 +135,7 @@ CREATE TABLE `crawl_dict`
 CREATE TABLE `crawl_upload_queue`
 (
     `id`            int(11)      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `host_ip`       varchar(50)           DEFAULT NULL,
+    `host_label`    varchar(50)           DEFAULT NULL COMMENT '主机标签。任务处理的主机的标签(config.yaml配置)。由哪台机器领取的M3U8下载任务就不能变更了',
     `country_code`  varchar(10)  NOT NULL COMMENT '国家二字码.(eg: CN,US,SG等)',
     `video_year`    int(11)      NOT NULL COMMENT '视频发布年份',
     `video_coll_id` bigint(20)   NOT NULL DEFAULT '-1' COMMENT '视频集ID（视频集ID，不限于电视剧,-1代表单集视频，或者说电影）',
@@ -150,7 +150,7 @@ CREATE TABLE `crawl_upload_queue`
     `update_user`   int(11)               DEFAULT '0' COMMENT '更新人',
     `update_time`   datetime              DEFAULT NULL COMMENT '更新时间',
     PRIMARY KEY (`id`)
-) ENGINE = InnoDB COMMENT ='文件上传队列'
+) ENGINE = InnoDB COMMENT ='文件上传队列';
 
 
 

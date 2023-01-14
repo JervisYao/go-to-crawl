@@ -21,7 +21,7 @@ type CrawlUploadQueueDao struct {
 // CrawlUploadQueueColumns defines and stores column names for table crawl_upload_queue.
 type CrawlUploadQueueColumns struct {
 	Id           string // 主键ID
-	HostIp       string //
+	HostLabel    string //
 	CountryCode  string // 国家二字码.(eg: CN,US,SG等)
 	VideoYear    string // 视频发布年份
 	VideoCollId  string // 视频集ID（视频集ID，不限于电视剧,-1代表单集视频，或者说电影）
@@ -40,7 +40,7 @@ type CrawlUploadQueueColumns struct {
 // crawlUploadQueueColumns holds the columns for table crawl_upload_queue.
 var crawlUploadQueueColumns = CrawlUploadQueueColumns{
 	Id:           "id",
-	HostIp:       "host_ip",
+	HostLabel:    "host_label",
 	CountryCode:  "country_code",
 	VideoYear:    "video_year",
 	VideoCollId:  "video_coll_id",

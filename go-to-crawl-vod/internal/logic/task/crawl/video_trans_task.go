@@ -25,9 +25,9 @@ func TransformTask(ctx gctx.Ctx) {
 	//查找配置文件IP下正在转码的数据
 	tans, err := dao.CrawlUploadQueue.Ctx(gctx.GetInitCtx()).Count(g.Map{
 		columns.UploadStatus: upload.Transforming,
-		columns.HostIp:       config.GetCrawlCfg("hostIp"),
+		columns.HostLabel:    config.GetCrawlCfg("hostLabel"),
 	})
-	//g.Dump(tans)
+
 	if err != nil {
 		log.Infof(gctx.GetInitCtx(), "countErr:%v", err)
 		return
@@ -43,7 +43,7 @@ func TransformTask(ctx gctx.Ctx) {
 	dao.CrawlUploadQueue.Ctx(gctx.GetInitCtx()).Scan(&queue,
 		g.Map{
 			columns.UploadStatus: upload.Uploaded,
-			columns.HostIp:       config.GetCrawlCfg("hostIp"),
+			columns.HostLabel:    config.GetCrawlCfg("hostLabel"),
 		})
 	if err != nil {
 		//log.Info("gettableErr:%v", err)
