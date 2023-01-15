@@ -11,9 +11,9 @@ import (
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/grand"
 	"go-to-crawl-vod/internal/model/entity"
-	"go-to-crawl-vod/internal/service/crawl"
-	"go-to-crawl-vod/internal/service/infra/config"
-	"go-to-crawl-vod/internal/service/video"
+	"go-to-crawl-vod/internal/service/crawlservice"
+	"go-to-crawl-vod/internal/service/infra/configservice"
+	"go-to-crawl-vod/internal/service/videoservice"
 	"go-to-crawl-vod/utility/fileutil"
 	"io/fs"
 	"io/ioutil"
@@ -46,7 +46,7 @@ func DownLoadToMp4(m3u8DO *M3u8DO) error {
 	var failCount int64 = 0
 	wg := sync.WaitGroup{}
 
-	proxyUrl := crawl.GetProxyByUrl(m3u8DO.FromUrl)
+	proxyUrl := crawlservice.GetProxyByUrl(m3u8DO.FromUrl)
 	err := DownloadDependenceFile(m3u8DO, proxyUrl)
 	if err != nil {
 		return err
@@ -90,7 +90,7 @@ func DownLoadToMp4(m3u8DO *M3u8DO) error {
 }
 
 func DiscardTsWhenDebug(m3u8DO *M3u8DO) {
-	if config.GetCrawlDebugBool("notDownloadAll") {
+	if configservice.GetCrawlDebugBool("notDownloadAll") {
 		srcCnt := 0
 		var newLineList []StreamLineDO
 		for _, lineDO := range m3u8DO.StreamLineList {
@@ -269,7 +269,7 @@ func IsPngType(tsPath string) bool {
 
 // 过期方法不建议使用(1、ffmpeg直接下载会卡死；2、不支持代理选项)
 func DownloadSeed(log *glog.Logger, seed *entity.CrawlQueue) error {
-	videoDir := video.GetVideoDir(seed.CountryCode, seed.VideoYear, seed.VideoCollId, seed.VideoItemId)
+	videoDir := videoservice.GetVideoDir(seed.CountryCode, seed.VideoYear, seed.VideoCollId, seed.VideoItemId)
 	orgMP4Path := videoDir + OrgMp4Name
 	orgM3U8Path := videoDir + OrgM3U8Name
 	// eg: ffmpeg -protocol_whitelist concat,file,http,https,tcp,tls,crypto -v error -y -i org_index.m3u8 -c copy org.mp4

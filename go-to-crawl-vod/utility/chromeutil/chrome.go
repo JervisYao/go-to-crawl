@@ -4,8 +4,8 @@ import (
 	"github.com/corpix/uarand"
 	"github.com/tebeka/selenium"
 	"github.com/tebeka/selenium/chrome"
-	"go-to-crawl-vod/internal/service/infra/browsermobproxy"
-	"go-to-crawl-vod/internal/service/infra/config"
+	"go-to-crawl-vod/internal/service/infra/configservice"
+	"go-to-crawl-vod/internal/service/infra/webproxyservice"
 )
 
 const (
@@ -17,16 +17,16 @@ func GetChromeDriverService(port int) (*selenium.Service, error) {
 	opts := []selenium.ServiceOption{
 		//selenium.Output(os.Stderr), // Output debug information to STDERR.
 	}
-	chromeDriverPath := config.GetCrawlCfg("chromeDriverPath")
+	chromeDriverPath := configservice.GetCrawlCfg("chromeDriverPath")
 	service, _ := selenium.NewChromeDriverService(chromeDriverPath, port, opts...)
 	return service, nil
 }
 
-func GetAllCaps(mobProxy *browsermobproxy.Client) selenium.Capabilities {
+func GetAllCaps(mobProxy *webproxyservice.Client) selenium.Capabilities {
 	return GetAllCapsChooseProxy(mobProxy, "")
 }
 
-func GetAllCapsChooseProxy(mobProxy *browsermobproxy.Client, crawlerProxy string) selenium.Capabilities {
+func GetAllCapsChooseProxy(mobProxy *webproxyservice.Client, crawlerProxy string) selenium.Capabilities {
 	chromeCaps := GetChromeCaps(mobProxy, crawlerProxy)
 
 	caps := GetCommonCaps("chrome")
@@ -41,7 +41,7 @@ func GetCommonCaps(browser string) selenium.Capabilities {
 	return caps
 }
 
-func GetChromeCaps(mobProxy *browsermobproxy.Client, crawlerProxy string) chrome.Capabilities {
+func GetChromeCaps(mobProxy *webproxyservice.Client, crawlerProxy string) chrome.Capabilities {
 	args := []string{
 		"--no-sandbox",
 		"--ignore-certificate-errors",
@@ -51,7 +51,7 @@ func GetChromeCaps(mobProxy *browsermobproxy.Client, crawlerProxy string) chrome
 	}
 
 	// headless
-	headless := config.GetCrawlBool("chromeHeadless")
+	headless := configservice.GetCrawlBool("chromeHeadless")
 	if headless {
 		args = append(args, "--headless")
 	}
@@ -66,13 +66,13 @@ func GetChromeCaps(mobProxy *browsermobproxy.Client, crawlerProxy string) chrome
 	}
 
 	// 谷歌缓存的用户信息，用于让selenium记录用户登录状态
-	userDataDir := config.GetCrawlCfg("userDataDir")
+	userDataDir := configservice.GetCrawlCfg("userDataDir")
 	if userDataDir != "" {
 		args = append(args, "--user-data-dir="+userDataDir)
 	}
 
 	chromeCaps := chrome.Capabilities{
-		Path:  config.GetCrawlCfg("chromeExePath"),
+		Path:  configservice.GetCrawlCfg("chromeExePath"),
 		Args:  args,
 		Prefs: map[string]interface{}{
 			//"profile.managed_default_content_settings.images": 2,

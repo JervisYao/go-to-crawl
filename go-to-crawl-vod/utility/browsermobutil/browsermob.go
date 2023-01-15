@@ -11,8 +11,8 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/tebeka/selenium"
 	"go-to-crawl-vod/internal/consts"
-	"go-to-crawl-vod/internal/service/crawl"
-	"go-to-crawl-vod/internal/service/infra/browsermobproxy"
+	"go-to-crawl-vod/internal/service/crawlservice"
+	"go-to-crawl-vod/internal/service/infra/webproxyservice"
 	"go-to-crawl-vod/utility/fileutil"
 	"io"
 	"time"
@@ -20,11 +20,11 @@ import (
 
 const ResponseBody = "responseBody" // 外部根据情况使用响应体
 
-func GetHarRequestLocalRetry(proxy *browsermobproxy.Client, patternUrl string, patternContent string) *gjson.Json {
+func GetHarRequestLocalRetry(proxy *webproxyservice.Client, patternUrl string, patternContent string) *gjson.Json {
 	return GetHarRequest(proxy, patternUrl, patternContent, consts.LocalRetry)
 }
 
-func GetHarRequest(proxy *browsermobproxy.Client, patternUrl string, patternContent string, retry int) *gjson.Json {
+func GetHarRequest(proxy *webproxyservice.Client, patternUrl string, patternContent string, retry int) *gjson.Json {
 	array := GetHarRequestArray(proxy, patternUrl, patternContent, retry, true)
 	if len(array) == 0 {
 		return nil
@@ -32,7 +32,7 @@ func GetHarRequest(proxy *browsermobproxy.Client, patternUrl string, patternCont
 	return array[0]
 }
 
-func GetHarRequestArray(proxy *browsermobproxy.Client, patternUrl string, patternContent string, retry int, returnOnGetOne bool) []*gjson.Json {
+func GetHarRequestArray(proxy *webproxyservice.Client, patternUrl string, patternContent string, retry int, returnOnGetOne bool) []*gjson.Json {
 	log := g.Log().Line()
 	var targetRequestArray []*gjson.Json
 
@@ -56,7 +56,7 @@ func GetHarRequestArray(proxy *browsermobproxy.Client, patternUrl string, patter
 		if gstr.ContainsI(reqUrl, patternUrl) {
 			log.Infof(gctx.GetInitCtx(), "idx = %d, reqUrl = %s", idx, reqUrl)
 			log.Info(gctx.GetInitCtx(), rspContent)
-			proxyUrl := crawl.GetProxyByUrl(reqUrl)
+			proxyUrl := crawlservice.GetProxyByUrl(reqUrl)
 
 			builder := fileutil.CreateBuilder().Url(reqUrl).Proxy(proxyUrl).Retry(fileutil.Retry)
 
@@ -131,14 +131,14 @@ func GetHarResponseBody(harRequest *gjson.Json) string {
 	return fmt.Sprintf("%s", item)
 }
 
-func NewHar(proxy *browsermobproxy.Client) {
+func NewHar(proxy *webproxyservice.Client) {
 	proxy.NewHar("", map[string]string{
 		"captureHeaders": "true",
 		"captureContent": "true",
 	})
 }
 
-func NewHarWait(wd selenium.WebDriver, proxy *browsermobproxy.Client) {
+func NewHarWait(wd selenium.WebDriver, proxy *webproxyservice.Client) {
 	NewHar(proxy)
 	_ = wd.SetPageLoadTimeout(gtime.S * 10)
 }
