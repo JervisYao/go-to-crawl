@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/tebeka/selenium"
+	"go-to-crawl-vod/internal/consts"
 	"go-to-crawl-vod/internal/logic/task/taskdto"
 	"go-to-crawl-vod/internal/service/infra/configservice"
 	"go-to-crawl-vod/internal/service/infra/webproxyservice"
@@ -32,7 +33,7 @@ func (crawlUrl *browser) Start() {
 	ctx.Service = service
 	defer ctx.Service.Stop()
 
-	xServer := webproxyservice.NewServer(configservice.GetCrawlCfg("browserProxyPath"))
+	xServer := webproxyservice.NewServer(configservice.GetCrawlCfg(consts.CrawlBrowserProxyPath))
 	xServer.Start()
 	ctx.XServer = xServer
 	defer ctx.XServer.Stop()

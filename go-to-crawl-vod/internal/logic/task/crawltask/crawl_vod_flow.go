@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/tebeka/selenium"
+	"go-to-crawl-vod/internal/consts"
 	"go-to-crawl-vod/internal/logic/task/taskdto"
 	"go-to-crawl-vod/internal/model/entity"
 	"go-to-crawl-vod/internal/service/crawlservice"
@@ -69,7 +70,7 @@ func DoStartCrawlVodFlow(seed *entity.CrawlQueue) {
 		caps := chromeutil.GetAllCaps(nil)
 
 		if strategy.UseBrowserMobProxy() {
-			xServer := webproxyservice.NewServer(configservice.GetCrawlCfg("browserProxyPath"))
+			xServer := webproxyservice.NewServer(configservice.GetCrawlCfg(consts.CrawlBrowserProxyPath))
 			xServer.Start()
 			ctx.XServer = xServer
 			defer ctx.XServer.Stop()

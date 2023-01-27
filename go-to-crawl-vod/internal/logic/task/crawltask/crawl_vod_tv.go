@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/tebeka/selenium"
+	"go-to-crawl-vod/internal/consts"
 	"go-to-crawl-vod/internal/dao"
 	"go-to-crawl-vod/internal/logic/task/taskdto"
 	"go-to-crawl-vod/internal/model/entity"
@@ -183,7 +184,7 @@ func DoStartCrawlVodTV(configTaskDO *serviceentity.CrawlVodConfigTaskDO) {
 		caps := chromeutil.GetAllCapsChooseProxy(nil, proxyUrl)
 
 		if strategy.UseBrowserMobProxy() {
-			xServer := webproxyservice.NewServer(configservice.GetCrawlCfg("browserProxyPath"))
+			xServer := webproxyservice.NewServer(configservice.GetCrawlCfg(consts.CrawlBrowserProxyPath))
 			xServer.Start()
 			ctx.XServer = xServer
 			defer ctx.XServer.Stop()
@@ -241,7 +242,7 @@ func DoStartCrawlVodPadInfo(vodTVItem *entity.CrawlVod) {
 		caps := chromeutil.GetAllCapsChooseProxy(nil, proxyUrl)
 
 		if strategy.UseBrowserMobProxy() {
-			xServer := webproxyservice.NewServer(configservice.GetCrawlCfg("browserProxyPath"))
+			xServer := webproxyservice.NewServer(configservice.GetCrawlCfg(consts.CrawlBrowserProxyPath))
 			xServer.Start()
 			ctx.XServer = xServer
 			defer ctx.XServer.Stop()

@@ -1,9 +1,10 @@
 package chromeutil
 
 import (
-	"github.com/corpix/uarand"
+	"fmt"
 	"github.com/tebeka/selenium"
 	"github.com/tebeka/selenium/chrome"
+	"go-to-crawl-vod/internal/consts"
 	"go-to-crawl-vod/internal/service/infra/configservice"
 	"go-to-crawl-vod/internal/service/infra/webproxyservice"
 )
@@ -17,7 +18,7 @@ func GetChromeDriverService(port int) (*selenium.Service, error) {
 	opts := []selenium.ServiceOption{
 		//selenium.Output(os.Stderr), // Output debug information to STDERR.
 	}
-	chromeDriverPath := configservice.GetCrawlCfg("chromeDriverPath")
+	chromeDriverPath := configservice.GetCrawlCfg(consts.CrawlBrowserDriverPath)
 	service, _ := selenium.NewChromeDriverService(chromeDriverPath, port, opts...)
 	return service, nil
 }
@@ -46,12 +47,12 @@ func GetChromeCaps(mobProxy *webproxyservice.Client, crawlerProxy string) chrome
 		"--no-sandbox",
 		"--ignore-certificate-errors",
 		"--disable-blink-features=AutomationControlled", // 隐藏自己是selenium. window.navigator.webdrive=true
-		"--user-agent=" + uarand.GetRandom(),
+		"--user-agent=" + GetRandomUA(false),
 		"--acceptSslCerts=true",
 	}
 
 	// headless
-	headless := configservice.GetCrawlBool("chromeHeadless")
+	headless := configservice.GetCrawlBool(consts.CrawlBrowserHeadless)
 	if headless {
 		args = append(args, "--headless")
 	}
@@ -65,14 +66,16 @@ func GetChromeCaps(mobProxy *webproxyservice.Client, crawlerProxy string) chrome
 		}
 	}
 
-	// 谷歌缓存的用户信息，用于让selenium记录用户登录状态
-	userDataDir := configservice.GetCrawlCfg("userDataDir")
+	// 缓存的用户信息，用于让selenium记录用户登录状态
+	userDataDir := configservice.GetCrawlCfg(consts.CrawlBrowserUserDataDir)
+	driverType := configservice.GetCrawlCfg(consts.CrawlBrowserDriverType)
+
 	if userDataDir != "" {
-		args = append(args, "--user-data-dir="+userDataDir)
+		args = append(args, "--user-data-dir="+fmt.Sprintf("%s\\%s", userDataDir, driverType))
 	}
 
 	chromeCaps := chrome.Capabilities{
-		Path:  configservice.GetCrawlCfg("chromeExePath"),
+		Path:  configservice.GetCrawlCfg(consts.CrawlBrowserExecutorPath),
 		Args:  args,
 		Prefs: map[string]interface{}{
 			//"profile.managed_default_content_settings.images": 2,
