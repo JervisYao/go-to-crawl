@@ -28,10 +28,18 @@ func GetAllCaps(mobProxy *webproxyservice.Client) selenium.Capabilities {
 }
 
 func GetAllCapsChooseProxy(mobProxy *webproxyservice.Client, crawlerProxy string) selenium.Capabilities {
-	chromeCaps := GetChromeCaps(mobProxy, crawlerProxy)
+	driverType := configservice.GetCrawlCfg(consts.CrawlBrowserDriverType)
+	caps := GetCommonCaps(driverType)
 
-	caps := GetCommonCaps("chrome")
-	caps.AddChrome(chromeCaps)
+	if driverType == consts.DriverTypeChrome {
+		chromeCaps := GetChromeCaps(mobProxy, crawlerProxy)
+		caps.AddChrome(chromeCaps)
+	} else if driverType == consts.DriverTypeEdge {
+		// TODO 待兼容Edge浏览器
+		chromeCaps := GetChromeCaps(mobProxy, crawlerProxy)
+		caps.AddChrome(chromeCaps)
+	}
+
 	return caps
 }
 

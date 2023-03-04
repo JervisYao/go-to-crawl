@@ -1,0 +1,7 @@
+# CLI tool, only in development environment.
+# https://goframe.org/pages/viewpage.action?pageId=3673173
+gfcli:
+  gen:
+    dao:
+      - link: "mysql:root:root@tcp(172.27.178.58:3306)/go_to_crawl"
+        tables: "crawl_upload_queue"
