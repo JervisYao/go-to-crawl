@@ -8,10 +8,10 @@ import (
 	"github.com/gogf/gf/v2/text/gregex"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/tebeka/selenium"
-	"go-to-crawl-common/internal/service/crawlservice"
 	"go-to-crawl-common/utility/chromeutil"
 	"go-to-crawl-common/utility/selectorutil"
 	"go-to-crawl-common/utility/timeutil"
+	crawlservice2 "go-to-crawl-video/internal/service/crawlservice"
 	"time"
 )
 
@@ -80,7 +80,7 @@ func (crawlUrl *crawlCheckTask) LoginQQ(waitScan bool) {
 }
 
 func (crawlUrl *crawlCheckTask) CrawlUrlFailNotifyTask(ctx gctx.Ctx) {
-	list := crawlservice.GetNeedNotifySeedList()
+	list := crawlservice2.GetNeedNotifySeedList()
 	if len(list) == 0 {
 		return
 	}
@@ -90,7 +90,7 @@ func (crawlUrl *crawlCheckTask) CrawlUrlFailNotifyTask(ctx gctx.Ctx) {
 
 	for _, seed := range list {
 		log.Errorf(gctx.GetInitCtx(), "失败seed. url = %s", seed.CrawlSeedUrl)
-		seed.CrawlM3U8Notify = crawlservice.CrawlM3U8NotifyYes
-		crawlservice.UpdateStatus(seed, seed.CrawlStatus)
+		seed.CrawlM3U8Notify = crawlservice2.CrawlM3U8NotifyYes
+		crawlservice2.UpdateStatus(seed, seed.CrawlStatus)
 	}
 }

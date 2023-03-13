@@ -6,15 +6,15 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/tebeka/selenium"
-	"go-to-crawl-common/internal/consts"
+	"go-to-crawl-common/consts"
 	"go-to-crawl-common/internal/logic/task/taskdto"
-	"go-to-crawl-common/internal/model/entity"
-	"go-to-crawl-common/internal/service/crawlservice"
-	"go-to-crawl-common/internal/service/infra/configservice"
-	"go-to-crawl-common/internal/service/infra/lockservice"
-	"go-to-crawl-common/internal/service/infra/webproxyservice"
 	"go-to-crawl-common/utility/browsermobutil"
 	"go-to-crawl-common/utility/chromeutil"
+	"go-to-crawl-video/internal/model/entity"
+	crawlservice2 "go-to-crawl-video/internal/service/crawlservice"
+	"go-to-crawl-video/internal/service/infra/configservice"
+	"go-to-crawl-video/internal/service/infra/lockservice"
+	"go-to-crawl-video/internal/service/infra/webproxyservice"
 )
 
 var CrawlTask = new(CrawlUrl)
@@ -28,7 +28,7 @@ func (crawlUrl *CrawlUrl) CrawlUrlTask(ctx gctx.Ctx) {
 	}
 	defer lockservice.ReleaseLockSelenium()
 
-	seed := getEnvPreparedSeed("", crawlservice.BusinessTypeNormal)
+	seed := getEnvPreparedSeed("", crawlservice2.BusinessTypeNormal)
 	if seed != nil {
 		DoStartCrawlVodFlow(seed)
 	}
@@ -41,18 +41,18 @@ func (crawlUrl *CrawlUrl) CrawlUrlType1Task(ctx gctx.Ctx) {
 	}
 	defer lockservice.ReleaseLockSelenium()
 
-	seed := getEnvPreparedSeed("", crawlservice.BusinessTypeCrawlLogin)
+	seed := getEnvPreparedSeed("", crawlservice2.BusinessTypeCrawlLogin)
 	if seed != nil {
 		DoStartCrawlVodFlow(seed)
 	}
 }
 
 func getEnvPreparedSeed(hostname string, hostType int) *entity.CrawlQueue {
-	seed := crawlservice.GetSeed(crawlservice.Init, hostname, hostType)
+	seed := crawlservice2.GetSeed(crawlservice2.Init, hostname, hostType)
 	if seed == nil {
 		return nil
 	}
-	crawlservice.UpdateStatus(seed, crawlservice.Crawling)
+	crawlservice2.UpdateStatus(seed, crawlservice2.Crawling)
 
 	return seed
 }
@@ -87,7 +87,7 @@ func DoStartCrawlVodFlow(seed *entity.CrawlQueue) {
 		if ctx.Wd == nil {
 			ctx.CrawlQueueSeed.ErrorMsg = "WebDriver Init Fail"
 			ctx.Log.Error(gctx.GetInitCtx(), err)
-			crawlservice.UpdateStatus(ctx.CrawlQueueSeed, crawlservice.CrawlErr)
+			crawlservice2.UpdateStatus(ctx.CrawlQueueSeed, crawlservice2.CrawlErr)
 			return
 		}
 		defer ctx.Wd.Quit()
@@ -108,5 +108,5 @@ func DoStartCrawlVodFlow(seed *entity.CrawlQueue) {
 
 	// 把URL,Headers信息保存起来
 	strategy.FillTargetRequest(ctx)
-	crawlservice.UpdateUrlAndStatus(ctx.CrawlQueueSeed)
+	crawlservice2.UpdateUrlAndStatus(ctx.CrawlQueueSeed)
 }

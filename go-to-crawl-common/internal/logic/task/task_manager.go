@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/glog"
 	"go-to-crawl-common/internal/logic/task/crawltask"
-	"go-to-crawl-common/internal/service/crawlservice"
+	"go-to-crawl-video/internal/service/crawlservice"
 )
 
 func StartAllTask() {

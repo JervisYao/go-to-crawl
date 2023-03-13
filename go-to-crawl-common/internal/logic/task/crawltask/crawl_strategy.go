@@ -5,8 +5,8 @@ import (
 	"go-to-crawl-common/internal/logic/task/crawltask/bilibilitask"
 	"go-to-crawl-common/internal/logic/task/crawltask/nunuyytask"
 	"go-to-crawl-common/internal/logic/task/taskdto"
-	"go-to-crawl-common/internal/model/entity"
-	"go-to-crawl-common/internal/service/crawlservice"
+	entity2 "go-to-crawl-video/internal/model/entity"
+	"go-to-crawl-video/internal/service/crawlservice"
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 	QQ        = "v.qq.com"
 )
 
-func getCrawlVodFlowStrategy(seed *entity.CrawlQueue) taskdto.CrawlVodFlowInterface {
+func getCrawlVodFlowStrategy(seed *entity2.CrawlQueue) taskdto.CrawlVodFlowInterface {
 
 	url := seed.CrawlSeedUrl
 
@@ -28,11 +28,11 @@ func getCrawlVodFlowStrategy(seed *entity.CrawlQueue) taskdto.CrawlVodFlowInterf
 	return nil
 }
 
-func getCrawlVodTVStrategy(seed *entity.CrawlVodConfig) taskdto.CrawlVodTVInterface {
+func getCrawlVodTVStrategy(seed *entity2.CrawlVodConfig) taskdto.CrawlVodTVInterface {
 	return nil
 }
 
-func getCrawlVodPadInfoStrategy(seed *entity.CrawlVod) taskdto.CrawlVodTVInterface {
+func getCrawlVodPadInfoStrategy(seed *entity2.CrawlVod) taskdto.CrawlVodTVInterface {
 	return nil
 }
 

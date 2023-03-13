@@ -6,61 +6,61 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gfile"
-	"go-to-crawl-common/internal/service/crawlservice"
-	"go-to-crawl-common/internal/service/infra/configservice"
-	"go-to-crawl-common/internal/service/infra/lockservice"
-	"go-to-crawl-common/internal/service/videoservice"
 	"go-to-crawl-common/utility/ffmpegutil"
 	"go-to-crawl-common/utility/fileutil"
+	crawlservice2 "go-to-crawl-video/internal/service/crawlservice"
+	"go-to-crawl-video/internal/service/infra/configservice"
+	lockservice2 "go-to-crawl-video/internal/service/infra/lockservice"
+	"go-to-crawl-video/internal/service/videoservice"
 )
 
 func DownloadMp4Type1Task(ctx gctx.Ctx) {
-	doDownloadMp4(crawlservice.BusinessTypeCrawlLogin)
+	doDownloadMp4(crawlservice2.BusinessTypeCrawlLogin)
 }
 
 func DownloadMp4Type2Task(ctx gctx.Ctx) {
-	doDownloadMp4(crawlservice.BusinessTypeNiVod)
+	doDownloadMp4(crawlservice2.BusinessTypeNiVod)
 }
 
 func DownloadMp4Type3Task(ctx gctx.Ctx) {
-	if lockservice.IncreaseValue(lockservice.DownloadMp4Type3) {
-		defer lockservice.DecreaseValue(lockservice.DownloadMp4Type3)
-		doDownloadMp4(crawlservice.BusinessTypeBananTV)
+	if lockservice2.IncreaseValue(lockservice2.DownloadMp4Type3) {
+		defer lockservice2.DecreaseValue(lockservice2.DownloadMp4Type3)
+		doDownloadMp4(crawlservice2.BusinessTypeBananTV)
 	}
 }
 
 func DownloadMp4Task(ctx gctx.Ctx) {
-	doDownloadMp4(crawlservice.BusinessTypeNormal)
+	doDownloadMp4(crawlservice2.BusinessTypeNormal)
 }
 
 func doDownloadMp4(hostType int) {
-	seed := crawlservice.GetSeed(crawlservice.CrawlFinish, configservice.GetCrawlHostLabel(), hostType)
+	seed := crawlservice2.GetSeed(crawlservice2.CrawlFinish, configservice.GetCrawlHostLabel(), hostType)
 
 	if seed == nil {
 		return
 	}
 	log := g.Log().Line()
 
-	crawlservice.UpdateStatus(seed, crawlservice.M3U8Parsing)
+	crawlservice2.UpdateStatus(seed, crawlservice2.M3U8Parsing)
 	// 创建最终目录
 	videoDir := videoservice.GetVideoDir(seed.CountryCode, seed.VideoYear, seed.VideoCollId, seed.VideoItemId)
 	_ = gfile.Mkdir(videoDir)
 
 	// 下载M3U8文件
 	orgM3U8File := videoDir + ffmpegutil.OrgM3U8Name
-	proxyUrl := crawlservice.GetProxyByUrl(seed.CrawlM3U8Url)
+	proxyUrl := crawlservice2.GetProxyByUrl(seed.CrawlM3U8Url)
 
 	err := fileutil.DownloadM3U8File(seed.CrawlM3U8Url, proxyUrl, orgM3U8File, fileutil.Retry, seed.CrawlM3U8Text)
 	if err != nil {
 		log.Info(gctx.GetInitCtx(), err)
 		seed.ErrorMsg = "Download M3U8 Error"
-		crawlservice.UpdateStatus(seed, crawlservice.M3U8Err)
+		crawlservice2.UpdateStatus(seed, crawlservice2.M3U8Err)
 		return
 	}
 	// 下载完M3U8后，后续操作都只能当前主机处理
 	seed.HostLabel = configservice.GetCrawlHostLabel()
 
-	if crawlservice.TypeMP4Url == seed.CrawlType {
+	if crawlservice2.TypeMP4Url == seed.CrawlType {
 		// 直接下载MP4
 		builder := fileutil.CreateBuilder()
 		builder.Url(seed.CrawlSeedUrl)
@@ -78,7 +78,7 @@ func doDownloadMp4(hostType int) {
 		if err2 != nil {
 			log.Info(gctx.GetInitCtx(), err2)
 			seed.ErrorMsg = "标准化M3U8文件出错"
-			crawlservice.UpdateStatus(seed, crawlservice.M3U8Err)
+			crawlservice2.UpdateStatus(seed, crawlservice2.M3U8Err)
 			return
 		}
 
@@ -93,7 +93,7 @@ func doDownloadMp4(hostType int) {
 		//更新成功後刪除原m3u8文件
 		gfile.Remove(orgM3U8File)
 
-		if crawlservice.BusinessTypeCrawlLogin == hostType {
+		if crawlservice2.BusinessTypeCrawlLogin == hostType {
 			// 国内指定机器下载的，需要上传到国外点播服务器
 			//file.UpLoadToFastDFS(m3u8DO.MP4File, seed)
 		}

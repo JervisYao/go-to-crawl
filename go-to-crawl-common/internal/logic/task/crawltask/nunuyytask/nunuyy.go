@@ -6,11 +6,11 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/tebeka/selenium"
 	"go-to-crawl-common/internal/logic/task/taskdto"
-	"go-to-crawl-common/internal/model/entity"
 	"go-to-crawl-common/utility/browsermobutil"
 	"go-to-crawl-common/utility/ffmpegutil"
 	"go-to-crawl-common/utility/httputil"
 	"go-to-crawl-common/utility/selectorutil"
+	"go-to-crawl-video/internal/model/entity"
 	"time"
 )
 

@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/tebeka/selenium"
-	"go-to-crawl-common/internal/consts"
+	"go-to-crawl-common/consts"
 	"go-to-crawl-common/internal/logic/task/taskdto"
-	"go-to-crawl-common/internal/service/infra/configservice"
-	"go-to-crawl-common/internal/service/infra/webproxyservice"
 	"go-to-crawl-common/utility/browsermobutil"
 	"go-to-crawl-common/utility/chromeutil"
 	"go-to-crawl-common/utility/processutil"
+	"go-to-crawl-video/internal/service/infra/configservice"
+	"go-to-crawl-video/internal/service/infra/webproxyservice"
 )
 
 var BrowserTask = new(browser)

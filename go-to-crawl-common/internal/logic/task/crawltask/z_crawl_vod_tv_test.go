@@ -1,13 +1,13 @@
 package crawltask
 
 import (
-	"go-to-crawl-common/internal/model/entity"
+	entity2 "go-to-crawl-video/internal/model/entity"
 	"testing"
 )
 
 func doStartVodTV(domain, url string) {
 	seed := new(domain.CrawlVodConfigTaskDO)
-	seed.CrawlVodConfig = new(entity.CrawlVodConfig)
+	seed.CrawlVodConfig = new(entity2.CrawlVodConfig)
 	seed.SeedUrl = url
 	seed.PageSize = 6
 	seed.DomainKeyPart = domain
@@ -15,7 +15,7 @@ func doStartVodTV(domain, url string) {
 }
 
 func doStartVodPadInfo(seedUrl string) {
-	vodTvItem := new(entity.CrawlVod)
+	vodTvItem := new(entity2.CrawlVod)
 	vodTvItem.SeedUrl = seedUrl
 	DoStartCrawlVodPadInfo(vodTvItem)
 }

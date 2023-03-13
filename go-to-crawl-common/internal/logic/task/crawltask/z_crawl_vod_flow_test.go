@@ -2,7 +2,7 @@ package crawltask
 
 import (
 	"fmt"
-	"go-to-crawl-common/internal/model/entity"
+	"go-to-crawl-video/internal/model/entity"
 	"os/exec"
 
 	"testing"

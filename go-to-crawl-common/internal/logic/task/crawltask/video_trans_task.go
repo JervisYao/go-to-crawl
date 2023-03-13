@@ -5,12 +5,12 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/gtime"
-	"go-to-crawl-common/internal/dao"
-	"go-to-crawl-common/internal/model/entity"
-	"go-to-crawl-common/internal/service/infra/configservice"
-	"go-to-crawl-common/internal/service/uploadservice"
-	"go-to-crawl-common/internal/service/videoservice"
 	"go-to-crawl-common/utility/ffmpegutil"
+	"go-to-crawl-video/internal/dao"
+	"go-to-crawl-video/internal/model/entity"
+	"go-to-crawl-video/internal/service/infra/configservice"
+	"go-to-crawl-video/internal/service/uploadservice"
+	"go-to-crawl-video/internal/service/videoservice"
 	"path/filepath"
 )
 

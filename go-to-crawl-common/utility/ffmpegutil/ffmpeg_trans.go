@@ -4,9 +4,8 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/os/gfile"
+	"github.com/gogf/gf/frame/g"
+	"github.com/gogf/gf/os/gfile"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -31,7 +30,7 @@ func (f *mFFMPEG) CheckFile(FileDir, Path_Source, Path_Target string) error {
 	isTrans := f.IsTransAudio(str)
 	if isTrans {
 		//	需要转码 ->音频格式转为AAC标准音频
-		g.Log().Infof(gctx.GetInitCtx(), "change file package to mp4 and audio to aac")
+		g.Log().Infof("change file package to mp4 and audio to aac")
 		f.Exec("-v", "error", "-y", "-i", Path_Source, "-acodec", "aac", "-vcodec", "copy", Path_Target)
 		//g.Dump(o,s)
 	} else {
@@ -45,7 +44,7 @@ func (f *mFFMPEG) CheckFile(FileDir, Path_Source, Path_Target string) error {
 		return fmt.Errorf("trans fail source:%v", Path_Source)
 	}
 
-	g.Log().Infof(gctx.GetInitCtx(), "change file to m3u8")
+	g.Log().Infof("change file to m3u8")
 	f.Exec("-v", "error",
 		"-y", "-i", Path_Target,
 		"-c", "copy", "-f", "segment",
@@ -99,6 +98,7 @@ func (f *mFFMPEG) IsTransAudio(findstr string) bool {
 		//	无音频流处理(无音频流不转码 本身没有音频流也转不了)
 		return false
 	case 1:
+		//g.Dump("1111111111")
 		itemLine := AudioLine[0]
 		aacindex := strings.Index(itemLine, "Audio: aac")
 		if aacindex == -1 {
@@ -124,7 +124,7 @@ func (f *mFFMPEG) IsTransAudio(findstr string) bool {
 //执行FFMPEG命令输出返回值
 func (f *mFFMPEG) Exec(args ...string) (strout, strerr string) {
 	cmd := exec.Command(f.FFMPEG_PATH, args...)
-	g.Log().Infof(gctx.GetInitCtx(), "执行命令 do cmd:%s", cmd.String())
+	g.Log().Infof("执行命令 do cmd:%s", cmd.String())
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
 	if err := cmd.Start(); err != nil {
